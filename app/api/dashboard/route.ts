@@ -24,6 +24,13 @@ export async function GET(req: NextRequest) {
     const userBounties = await prisma.bounty.findMany({
       where: { creatorId: userId },
       include: {
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            hotkey: true
+          }
+        },
         _count: {
           select: {
             submissions: true
@@ -59,6 +66,23 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // Get user's suggested bounties
+    const userSuggestedBounties = await prisma.suggestedBounty.findMany({
+      where: { suggestedById: userId },
+      include: {
+        convertedBounty: {
+          select: {
+            id: true,
+            title: true,
+            status: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
     // Get user stats
     const stats = await prisma.user.findUnique({
       where: { id: userId },
@@ -66,7 +90,8 @@ export async function GET(req: NextRequest) {
         _count: {
           select: {
             bounties: true,
-            submissions: true
+            submissions: true,
+            suggestedBounties: true
           }
         }
       }
@@ -123,6 +148,12 @@ export async function GET(req: NextRequest) {
       score: activity.score?.toString() || null
     }))
 
+    const formattedSuggestedBounties = userSuggestedBounties.map(suggestion => ({
+      ...suggestion,
+      alphaReward: suggestion.alphaReward.toString(),
+      alphaRewardCap: suggestion.alphaRewardCap.toString()
+    }))
+
     return NextResponse.json({
       user: {
         id: session.user.id,
@@ -131,10 +162,12 @@ export async function GET(req: NextRequest) {
       },
       stats: {
         totalBounties: stats?._count?.bounties || 0,
-        totalSubmissions: stats?._count?.submissions || 0
+        totalSubmissions: stats?._count?.submissions || 0,
+        totalSuggestedBounties: stats?._count?.suggestedBounties || 0
       },
       bounties: formattedBounties,
       submissions: formattedSubmissions,
+      suggestedBounties: formattedSuggestedBounties,
       recentActivity: formattedActivity
     })
 

@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useSession, signOut } from 'next-auth/react'
-import { Wallet, Plus, Trophy, User, LogOut, Menu, X } from 'lucide-react'
+import { Wallet, Plus, Trophy, User, LogOut, Menu, X, Lightbulb, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -34,6 +34,7 @@ export function Navigation({ className }: NavigationProps) {
   const navigationItems = [
     { href: '/bounties', label: 'Bounties', icon: Trophy },
     ...(session?.user?.isAdmin ? [{ href: '/create', label: 'Create Bounty', icon: Plus }] : []),
+    ...(session && !session.user?.isAdmin ? [{ href: '/suggest-bounty', label: 'Suggest Bounty', icon: Lightbulb }] : []),
     ...(session ? [{ href: '/dashboard', label: 'Dashboard', icon: User }] : [])
   ]
 
@@ -107,6 +108,14 @@ export function Navigation({ className }: NavigationProps) {
                     <span>Dashboard</span>
                   </Link>
                 </DropdownMenuItem>
+                {session.user?.isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/suggested-bounties" className="flex items-center gap-2 cursor-pointer">
+                      <Settings className="h-4 w-4" />
+                      <span>Manage Suggestions</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   onClick={handleSignOut}

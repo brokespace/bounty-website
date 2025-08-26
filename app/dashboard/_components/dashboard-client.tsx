@@ -18,7 +18,9 @@ import {
   AlertCircle,
   Plus,
   Eye,
-  Calendar
+  Calendar,
+  Lightbulb,
+  XCircle
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -78,11 +80,11 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
       color: 'text-green-600'
     },
     {
-      title: 'Active Bounties',
-      value: data?.bounties?.filter((b: any) => b.status === 'ACTIVE').length || 0,
-      icon: <Activity className="h-5 w-5" />,
-      description: 'Currently active',
-      color: 'text-orange-600'
+      title: 'Suggested Bounties',
+      value: data?.stats?.totalSuggestedBounties || 0,
+      icon: <Lightbulb className="h-5 w-5" />,
+      description: 'Your suggestions',
+      color: 'text-yellow-600'
     },
     {
       title: 'Approved Submissions',
@@ -155,9 +157,10 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
 
       {/* Main Content */}
       <Tabs defaultValue="bounties" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="bounties">My Bounties</TabsTrigger>
           <TabsTrigger value="submissions">My Submissions</TabsTrigger>
+          <TabsTrigger value="suggestions">Suggested Bounties</TabsTrigger>
           <TabsTrigger value="activity">Recent Activity</TabsTrigger>
         </TabsList>
 
@@ -266,6 +269,98 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {submission.voteCount} votes
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Suggested Bounties */}
+        <TabsContent value="suggestions" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Suggested Bounties</h2>
+            <Link href="/suggest-bounty">
+              <Button size="sm" variant="outline">
+                <Lightbulb className="mr-2 h-4 w-4" />
+                Suggest New
+              </Button>
+            </Link>
+          </div>
+
+          {data?.suggestedBounties?.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Lightbulb className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No suggestions yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Suggest bounties to help grow the platform
+                </p>
+                <Link href="/suggest-bounty">
+                  <Button>Suggest Bounty</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {data?.suggestedBounties?.map((suggestion: any) => (
+                <Card key={suggestion.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">{suggestion.title}</h3>
+                          <Badge variant="secondary" className={getStatusColor(suggestion.status)}>
+                            {suggestion.status === 'PENDING' && <Clock className="w-3 h-3 mr-1" />}
+                            {suggestion.status === 'APPROVED' && <CheckCircle className="w-3 h-3 mr-1" />}
+                            {suggestion.status === 'REJECTED' && <XCircle className="w-3 h-3 mr-1" />}
+                            {suggestion.status}
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {suggestion.description}
+                        </p>
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Trophy className="h-4 w-4" />
+                            <span>{suggestion.alphaReward}α - {suggestion.alphaRewardCap}α</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>{new Date(suggestion.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        {suggestion.status === 'APPROVED' && suggestion.convertedBounty && (
+                          <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                            <p className="text-sm text-green-800">
+                              <CheckCircle className="w-4 h-4 inline mr-1" />
+                              Approved! View bounty: 
+                              <Link href={`/bounties/${suggestion.convertedBounty.id}`} className="ml-1 underline font-medium">
+                                {suggestion.convertedBounty.title}
+                              </Link>
+                            </p>
+                          </div>
+                        )}
+
+                        {suggestion.reviewNotes && (
+                          <div className="mt-3 p-3 bg-muted rounded-lg">
+                            <p className="text-sm"><strong>Admin Notes:</strong> {suggestion.reviewNotes}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-primary">
+                          {suggestion.alphaReward} α
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Suggested reward
                         </p>
                       </div>
                     </div>

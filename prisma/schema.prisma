@@ -52,6 +52,7 @@ model User {
   bounties      Bounty[]
   submissions   Submission[]
   votes         Vote[]
+  suggestedBounties SuggestedBounty[]
   
   @@map("users")
 }
@@ -70,6 +71,12 @@ enum BountyStatus {
   PAUSED
   COMPLETED
   CANCELLED
+}
+
+enum SuggestedBountyStatus {
+  PENDING     // Awaiting admin review
+  APPROVED    // Accepted by admin and converted to bounty
+  REJECTED    // Rejected by admin
 }
 
 enum RewardDistribution {
@@ -109,6 +116,7 @@ model Bounty {
   creator               User                @relation(fields: [creatorId], references: [id])
   submissions           Submission[]
   categories            BountyCategory[]
+  suggestedBounty       SuggestedBounty?    // If this bounty was created from a suggestion
   
   @@map("bounties")
 }
@@ -119,7 +127,8 @@ model BountyCategory {
   color     String?  // Hex color for UI
   createdAt DateTime @default(now())
   
-  bounties  Bounty[]
+  bounties         Bounty[]
+  suggestedBounties SuggestedBounty[]
   
   @@map("bounty_categories")
 }
@@ -236,4 +245,38 @@ model ValidationLog {
   submission   Submission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   
   @@map("validation_logs")
+}
+
+model SuggestedBounty {
+  id                    String                   @id @default(cuid())
+  title                 String
+  description           String                   @db.Text
+  requirements          String                   @db.Text
+  
+  // Reward details
+  alphaReward           Decimal                  @db.Decimal(18,8) // Suggested price in alpha
+  alphaRewardCap        Decimal                  @db.Decimal(18,8) // Maximum cap in alpha
+  rewardDistribution    RewardDistribution       @default(ALL_AT_ONCE)
+  winningSpots          Int                      @default(1) // Number of winning positions
+  
+  // Submission requirements
+  acceptedSubmissionTypes SubmissionContentType[] @default([FILE]) // What types of submissions this bounty accepts
+  
+  status                SuggestedBountyStatus    @default(PENDING)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  deadline              DateTime?                // Suggested deadline
+  
+  // Admin review fields
+  reviewedAt            DateTime?                // When admin reviewed
+  reviewNotes           String?                  @db.Text // Admin notes about approval/rejection
+  convertedBountyId     String?                  @unique // If approved, the ID of the created bounty
+  convertedBounty       Bounty?                  @relation(fields: [convertedBountyId], references: [id])
+  
+  // Relations
+  suggestedById         String
+  suggestedBy           User                     @relation(fields: [suggestedById], references: [id])
+  categories            BountyCategory[]
+  
+  @@map("suggested_bounties")
 }

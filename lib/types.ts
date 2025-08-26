@@ -32,6 +32,12 @@ export interface SubmissionContentType {
   MIXED: 'MIXED'
 }
 
+export interface SuggestedBountyStatus {
+  PENDING: 'PENDING'
+  APPROVED: 'APPROVED'
+  REJECTED: 'REJECTED'
+}
+
 declare module "next-auth" {
   interface Session {
     user: {
