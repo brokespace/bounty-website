@@ -1,0 +1,239 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/rizzo/bounty-website/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  hotkey        String    @unique // Crypto address (wallet address)
+  username      String?   @unique
+  password      String    // Hashed password
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isActive      Boolean   @default(true)
+  isAdmin       Boolean   @default(false)
+  
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  bounties      Bounty[]
+  submissions   Submission[]
+  votes         Vote[]
+  
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum BountyStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum RewardDistribution {
+  ALL_AT_ONCE    // 60% all at once
+  OVER_TIME      // 100% over time
+}
+
+enum SubmissionContentType {
+  URL       // URL links (GitHub repos, live demos, etc.)
+  FILE      // File uploads
+  TEXT      // Text-based submissions
+  MIXED     // Combination of the above
+}
+
+model Bounty {
+  id                    String              @id @default(cuid())
+  title                 String
+  description           String              @db.Text
+  requirements          String              @db.Text
+  
+  // Reward details
+  alphaReward           Decimal             @db.Decimal(18,8) // Current price in alpha
+  alphaRewardCap        Decimal             @db.Decimal(18,8) // Maximum cap in alpha
+  rewardDistribution    RewardDistribution  @default(ALL_AT_ONCE)
+  winningSpots          Int                 @default(1) // Number of winning positions
+  
+  // Submission requirements
+  acceptedSubmissionTypes SubmissionContentType[] @default([FILE]) // What types of submissions this bounty accepts
+  
+  status                BountyStatus        @default(DRAFT)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  deadline              DateTime?           // Optional deadline
+  
+  // Relations
+  creatorId             String
+  creator               User                @relation(fields: [creatorId], references: [id])
+  submissions           Submission[]
+  categories            BountyCategory[]
+  
+  @@map("bounties")
+}
+
+model BountyCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String?  // Hex color for UI
+  createdAt DateTime @default(now())
+  
+  bounties  Bounty[]
+  
+  @@map("bounty_categories")
+}
+
+enum SubmissionStatus {
+  PENDING       // Awaiting validation
+  VALIDATING    // Under automated/manual validation
+  APPROVED      // Passed validation
+  REJECTED      // Failed validation
+  WINNER        // Selected as winner
+}
+
+model Submission {
+  id            String           @id @default(cuid())
+  title         String
+  description   String           @db.Text
+  
+  // Content fields
+  contentType   SubmissionContentType @default(FILE) // Type of submission content
+  urls          String[]         @default([]) // Array of URLs for URL submissions
+  textContent   String?          @db.Text // Additional text content
+  
+  status        SubmissionStatus @default(PENDING)
+  score         Decimal?         @db.Decimal(5,2) // Validation score (0-100)
+  
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  validatedAt   DateTime?        // When validation completed
+  
+  // Relations
+  bountyId      String
+  bounty        Bounty           @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  submitterId   String
+  submitter     User             @relation(fields: [submitterId], references: [id])
+  files         SubmissionFile[]
+  votes         Vote[]
+  validationLogs ValidationLog[]
+  
+  @@map("submissions")
+}
+
+enum FileType {
+  DOCUMENT
+  IMAGE
+  VIDEO
+  CODE
+  ARCHIVE
+  OTHER
+}
+
+model SubmissionFile {
+  id            String     @id @default(cuid())
+  originalName  String     // Original filename
+  filename      String     // Stored filename
+  filepath      String     // Full path to file
+  filesize      BigInt     // File size in bytes
+  mimeType      String     // MIME type
+  fileType      FileType   @default(OTHER)
+  
+  uploadedAt    DateTime   @default(now())
+  
+  // Relations
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  @@map("submission_files")
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
+
+model Vote {
+  id           String   @id @default(cuid())
+  type         VoteType
+  createdAt    DateTime @default(now())
+  
+  // Relations
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  // Prevent duplicate votes
+  @@unique([userId, submissionId])
+  @@map("votes")
+}
+
+enum ValidationType {
+  AUTOMATED    // Automated validation
+  MANUAL       // Manual review
+  COMMUNITY    // Community voting
+}
+
+enum ValidationResult {
+  PASS
+  FAIL
+  PENDING
+}
+
+model ValidationLog {
+  id          String           @id @default(cuid())
+  type        ValidationType
+  result      ValidationResult @default(PENDING)
+  score       Decimal?         @db.Decimal(5,2) // 0-100 score
+  notes       String?          @db.Text
+  validatorId String?          // User who validated (for manual)
+  
+  createdAt   DateTime         @default(now())
+  
+  // Relations
+  submissionId String
+  submission   Submission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  @@map("validation_logs")
+}
