@@ -14,9 +14,26 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <SimpleNavigation />
-      <HomePageClient />
+    <div className="min-h-screen bg-animated relative overflow-x-hidden">
+      {/* Animated grid background */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 animate-gradient-shift" />
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px'
+          }}
+        />
+      </div>
+      
+      <div className="relative z-10">
+        <SimpleNavigation />
+        <HomePageClient />
+      </div>
     </div>
   )
 }

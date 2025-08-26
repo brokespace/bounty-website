@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { SimpleNavigation } from '@/components/simple-navigation'
 import { BountyCard } from '@/components/bounty-card'
 import { BountiesClient } from './_components/bounties-client'
+import { AnimatedSection } from '@/components/animated-section'
 import { Search, Filter, Plus, Trophy, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
@@ -133,19 +134,21 @@ export default async function BountiesPage() {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {statsCards.map((stat, index) => (
-            <Card key={index} className="border-muted/50 bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <AnimatedSection key={index} delay={index * 0.1} duration={0.6}>
+              <Card className="border-muted/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-2xl font-bold">{stat.value}</p>
+                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    </div>
+                    <div className={`${stat.color}`}>
+                      {stat.icon}
+                    </div>
                   </div>
-                  <div className={`${stat.color}`}>
-                    {stat.icon}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </AnimatedSection>
           ))}
         </div>
 

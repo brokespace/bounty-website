@@ -34,6 +34,7 @@ interface BountyCardProps {
 }
 
 export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE': return 'bg-green-500'
@@ -50,13 +51,26 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.1 }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+      whileInView={{ 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        transition: {
+          duration: 0.8,
+          delay: 0,
+          ease: [0.25, 0.46, 0.45, 0.94]
+        }
+      }}
+      viewport={{ once: true, margin: "0px 0px -5% 0px" }}
+      whileHover={{ 
+        y: -12,
+        scale: 1.02,
+        transition: { duration: 0.3 }
+      }}
       className="h-full"
     >
-      <Card className="h-full hover:shadow-lg transition-all duration-200 border-muted/50 bg-card/50 backdrop-blur-sm">
+      <Card className="h-full hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-muted/50 bg-card/50 backdrop-blur-sm transform-gpu">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2 mb-2">
             <Badge 

@@ -1,8 +1,8 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,6 +29,11 @@ export function BountiesClient({ initialBounties }: BountiesClientProps) {
   const [sortBy, setSortBy] = useState('createdAt')
   const [isLoading, setIsLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
+  
+  const filtersRef = useRef(null)
+  const gridRef = useRef(null)
+  const filtersInView = useInView(filtersRef, { once: true, margin: "-50px" })
+  const gridInView = useInView(gridRef, { once: true, margin: "0px 0px 300px 0px" })
 
   // Fetch bounties on mount
   useEffect(() => {
@@ -113,11 +118,41 @@ export function BountiesClient({ initialBounties }: BountiesClientProps) {
     { value: 'deadline', label: 'Deadline' }
   ]
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0,
+        delayChildren: 0
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10
+      }
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <Card className="border-muted/50 bg-card/50 backdrop-blur-sm">
-        <CardContent className="p-4">
+      <motion.div
+        ref={filtersRef}
+        initial="hidden"
+        animate={filtersInView ? "visible" : "hidden"}
+        variants={itemVariants}
+      >
+        <Card className="border-muted/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-4">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="relative flex-1">
@@ -195,8 +230,9 @@ export function BountiesClient({ initialBounties }: BountiesClientProps) {
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Active Filters */}
       {(searchQuery || statusFilter !== 'all') && (
@@ -255,11 +291,7 @@ export function BountiesClient({ initialBounties }: BountiesClientProps) {
           )}
         </motion.div>
       ) : (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredBounties.map((bounty, index) => (
             <BountyCard 
               key={bounty?.id || index} 
@@ -267,7 +299,7 @@ export function BountiesClient({ initialBounties }: BountiesClientProps) {
               index={index}
             />
           ))}
-        </motion.div>
+        </div>
       )}
     </div>
   )

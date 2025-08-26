@@ -60,6 +60,12 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        // Custom theme colors
+        'electric-blue': 'hsl(var(--electric-blue))',
+        'cyan': 'hsl(var(--cyan))',
+        'purple': 'hsl(var(--purple))',
+        'neon-green': 'hsl(var(--neon-green))',
+        'gold': 'hsl(var(--gold))',
       },
       keyframes: {
         'accordion-down': {
@@ -78,10 +84,71 @@ const config: Config = {
             height: '0',
           },
         },
+        'glow': {
+          '0%, 100%': {
+            boxShadow: '0 0 20px hsl(var(--primary) / 0.5)',
+          },
+          '50%': {
+            boxShadow: '0 0 30px hsl(var(--primary) / 0.8), 0 0 40px hsl(var(--accent) / 0.3)',
+          },
+        },
+        'float': {
+          '0%, 100%': {
+            transform: 'translateY(0px)',
+          },
+          '50%': {
+            transform: 'translateY(-10px)',
+          },
+        },
+        'pulse-slow': {
+          '0%, 100%': {
+            opacity: '1',
+          },
+          '50%': {
+            opacity: '0.7',
+          },
+        },
+        'gradient-shift': {
+          '0%': {
+            backgroundPosition: '0% 50%',
+          },
+          '50%': {
+            backgroundPosition: '100% 50%',
+          },
+          '100%': {
+            backgroundPosition: '0% 50%',
+          },
+        },
+        'slide-up': {
+          from: {
+            transform: 'translateY(100%)',
+            opacity: '0',
+          },
+          to: {
+            transform: 'translateY(0)',
+            opacity: '1',
+          },
+        },
+        'scale-in': {
+          from: {
+            transform: 'scale(0.9)',
+            opacity: '0',
+          },
+          to: {
+            transform: 'scale(1)',
+            opacity: '1',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+        'float': 'float 3s ease-in-out infinite',
+        'pulse-slow': 'pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'gradient-shift': 'gradient-shift 4s ease infinite',
+        'slide-up': 'slide-up 0.5s ease-out',
+        'scale-in': 'scale-in 0.3s ease-out',
       },
     },
   },

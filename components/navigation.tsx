@@ -46,7 +46,7 @@ export function Navigation({ className }: NavigationProps) {
     >
       <div className="container mx-auto max-w-6xl flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 mr-auto">
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
