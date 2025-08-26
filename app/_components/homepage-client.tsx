@@ -6,8 +6,64 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Wallet, Trophy, Target, Users, ArrowRight, Coins, Shield, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 export function HomePageClient() {
+  const [stats, setStats] = useState({
+    activeBounties: '0',
+    totalRewards: '0',
+    totalUsers: '0',
+    successRate: '0%'
+  })
+  
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats')
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch stats')
+        }
+
+        const data = await response.json()
+        const { stats } = data
+        
+        // Format the numbers for display
+        const formatNumber = (num: number) => {
+          if (num >= 1000) {
+            return `${(num / 1000).toFixed(1)}K`
+          }
+          return num.toString()
+        }
+
+        const formatRewards = (num: number) => {
+          if (num >= 1000000) {
+            return `${(num / 1000000).toFixed(1)}M α`
+          } else if (num >= 1000) {
+            return `${(num / 1000).toFixed(1)}K α`
+          }
+          return `${num} α`
+        }
+
+        setStats({
+          activeBounties: stats.bounties.active.toString(),
+          totalRewards: formatRewards(stats.rewards.totalNumeric),
+          totalUsers: formatNumber(stats.users.total),
+          successRate: `${stats.bounties.successRate}%`
+        })
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+        // Keep default values on error
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
   const features = [
     {
       icon: <Wallet className="h-8 w-8" />,
@@ -41,11 +97,11 @@ export function HomePageClient() {
     }
   ]
 
-  const stats = [
-    { label: "Active Bounties", value: "100+", icon: <Trophy className="h-5 w-5" /> },
-    { label: "Total Rewards", value: "50K α", icon: <Coins className="h-5 w-5" /> },
-    { label: "Hunters", value: "1,000+", icon: <Users className="h-5 w-5" /> },
-    { label: "Success Rate", value: "95%", icon: <Target className="h-5 w-5" /> }
+  const statsData = [
+    { label: "Active Bounties", value: stats.activeBounties, icon: <Trophy className="h-5 w-5" /> },
+    { label: "Total Rewards", value: stats.totalRewards, icon: <Coins className="h-5 w-5" /> },
+    { label: "Hunters", value: stats.totalUsers, icon: <Users className="h-5 w-5" /> },
+    { label: "Success Rate", value: stats.successRate, icon: <Target className="h-5 w-5" /> }
   ]
 
   return (
@@ -122,6 +178,176 @@ export function HomePageClient() {
         </motion.div>
       </section>
 
+      {/* Bounty System Explanation */}
+      <section className="container mx-auto max-w-6xl px-4 py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            How{' '}
+            <span className="text-gradient animate-gradient bg-gradient-to-r from-primary via-accent to-purple bg-clip-text text-transparent">
+              Bounties
+            </span>
+            {' '}Work
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Our revolutionary bounty system transforms how creators post challenges and hunters earn rewards in the crypto space.
+          </p>
+        </motion.div>
+
+        <div className="grid lg:grid-cols-3 gap-12 mb-16">
+          {[
+            {
+              step: "01",
+              title: "Create & Post",
+              description: "Creators post bounties with detailed requirements, deadlines, and alpha reward amounts. Set multiple winner spots and validation criteria.",
+              icon: "📝",
+              gradient: "from-primary to-blue-600"
+            },
+            {
+              step: "02", 
+              title: "Hunt & Submit",
+              description: "Bounty hunters browse active challenges, claim tasks, and submit their work with file uploads, code, or documentation.",
+              icon: "🎯",
+              gradient: "from-accent to-orange-500"
+            },
+            {
+              step: "03",
+              title: "Earn",
+              description: "Automated and community validation determines winners. Earn 60% alpha instantly or 100% over time with our unique reward system.",
+              icon: "💰",
+              gradient: "from-purple to-pink-500"
+            }
+          ].map((step, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: index * 0.2 + 1.1, duration: 0.6 }}
+              whileHover={{ y: -8, scale: 1.02 }}
+              className="group relative"
+            >
+              {/* Connecting Line */}
+              {index < 2 && (
+                <div className="hidden lg:block absolute top-1/2 -right-6 w-12 h-0.5 bg-gradient-to-r from-primary/30 to-accent/30 -translate-y-1/2 z-10">
+                  <motion.div
+                    className="w-full h-full bg-gradient-to-r from-primary to-accent"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: index * 0.2 + 1.5, duration: 0.8 }}
+                  />
+                </div>
+              )}
+              
+              <Card className="card-enhanced h-full relative overflow-hidden border border-primary/30 hover:border-primary/50 bg-card">
+                <div className={`absolute inset-0 bg-gradient-to-br ${step.gradient} opacity-0 group-hover:opacity-10 transition-all duration-500`} />
+                <div className="absolute -top-32 -right-32 w-32 h-32 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                
+                <CardContent className="p-8 text-center relative z-10">
+                  <motion.div
+                    className="text-6xl mb-6"
+                    animate={{ 
+                      rotate: [0, 5, -5, 0],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{ 
+                      duration: 3 + index,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    {step.icon}
+                  </motion.div>
+                  
+                  <div className="text-sm font-bold text-muted-foreground mb-2 tracking-wider">
+                    STEP {step.step}
+                  </div>
+                  
+                  <h3 className={`text-2xl font-bold mb-4 bg-gradient-to-r ${step.gradient} bg-clip-text text-transparent`}>
+                    {step.title}
+                  </h3>
+                  
+                  <p className="text-muted-foreground leading-relaxed">
+                    {step.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Bounty Types */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.7, duration: 0.6 }}
+          className="grid md:grid-cols-2 gap-8"
+        >
+          <Card className="card-enhanced relative overflow-hidden border border-accent/30 hover:border-accent/50 bg-card">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/8 via-orange-500/8 to-yellow-500/8 opacity-80" />
+            <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-accent/20 to-orange-500/20 rounded-full blur-3xl" />
+            
+            <CardHeader className="relative z-10">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="text-4xl mb-4"
+              >
+                🔥
+              </motion.div>
+              <CardTitle className="text-2xl font-bold text-gradient bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">
+                Development Bounties
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <p className="text-muted-foreground mb-4">
+                Code challenges, smart contract development, web3 integrations, and technical implementations.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {["Frontend", "Smart Contracts", "APIs", "Web3", "DeFi"].map((tag, i) => (
+                  <span key={i} className="px-3 py-1 bg-accent/20 text-accent rounded-full text-sm">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="card-enhanced relative overflow-hidden border border-purple/30 hover:border-purple/50 bg-card">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple/8 via-pink-500/8 to-blue-500/8 opacity-80" />
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-purple/20 to-pink-500/20 rounded-full blur-3xl" />
+            
+            <CardHeader className="relative z-10">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                className="text-4xl mb-4"
+              >
+                🎨
+              </motion.div>
+              <CardTitle className="text-2xl font-bold text-gradient bg-gradient-to-r from-purple to-pink-500 bg-clip-text text-transparent">
+                Creative Bounties
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <p className="text-muted-foreground mb-4">
+                Design challenges, content creation, marketing materials, and creative digital assets.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {["Design", "Content", "Graphics", "Video", "Marketing"].map((tag, i) => (
+                  <span key={i} className="px-3 py-1 bg-purple/20 text-purple-300 rounded-full text-sm">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </section>
+
       {/* Stats Section */}
       <section className="container mx-auto max-w-6xl px-4 py-20">
         <motion.div
@@ -130,7 +356,7 @@ export function HomePageClient() {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-8"
         >
-          {stats.map((stat, index) => (
+          {statsData.map((stat, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30, scale: 0.9 }}
@@ -152,7 +378,11 @@ export function HomePageClient() {
                     </div>
                   </motion.div>
                   <div className="text-3xl font-bold mb-2 text-gradient animate-gradient bg-gradient-to-r from-primary to-accent bg-clip-text">
-                    {stat.value}
+                    {loading ? (
+                      <div className="animate-pulse bg-primary/20 h-8 w-16 rounded"></div>
+                    ) : (
+                      stat.value
+                    )}
                   </div>
                   <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
                 </CardContent>
@@ -178,7 +408,7 @@ export function HomePageClient() {
             ?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Built for the crypto community with cutting-edge features and seamless user experience.
+            Discover how our bounty system revolutionizes crypto rewards with cutting-edge features designed for hunters and creators alike.
           </p>
         </motion.div>
         
@@ -289,6 +519,108 @@ export function HomePageClient() {
         </motion.div>
       </section>
 
+      {/* Team Rizzo Section */}
+      <section className="container mx-auto max-w-6xl px-4 py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.6, duration: 0.8 }}
+          className="text-center relative"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-purple/10 via-primary/10 to-accent/10 blur-3xl animate-pulse-slow -z-10 rounded-full" />
+          
+          <motion.h2 
+            className="text-3xl md:text-4xl font-bold mb-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 2.8, duration: 0.6 }}
+          >
+            <span className="text-gradient animate-gradient bg-gradient-to-r from-purple via-primary to-accent bg-clip-text text-transparent">
+              Brought to you by Team Rizzo
+            </span>
+          </motion.h2>
+          
+          <motion.div 
+            className="flex flex-col md:flex-row items-center justify-center gap-8 mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 3.0, duration: 0.6 }}
+          >
+            <Card className="card-enhanced relative overflow-hidden border border-purple/30 hover:border-purple/50 bg-card max-w-md">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/8 via-primary/8 to-accent/8 opacity-80" />
+              <div className="absolute -top-20 -right-20 w-32 h-32 bg-gradient-to-br from-purple/20 to-accent/20 rounded-full blur-2xl" />
+              
+              <CardContent className="p-8 text-center relative z-10">
+                <motion.div 
+                  className="text-6xl mb-6"
+                  animate={{ 
+                    rotate: [0, 10, -10, 0],
+                    scale: [1, 1.05, 1]
+                  }}
+                  transition={{ 
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  🏴‍☠️
+                </motion.div>
+                <h3 className="text-xl font-bold mb-4 text-gradient bg-gradient-to-r from-purple to-primary bg-clip-text text-transparent">
+                  Innovation Pirates
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  We're a team of crypto enthusiasts and developers sailing the digital seas, 
+                  building the future of decentralized bounty hunting one line of code at a time.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <motion.div 
+              className="text-center space-y-4"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                animate={{
+                  y: [0, -10, 0],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="text-8xl mb-4"
+              >
+                ⚓
+              </motion.div>
+              <h3 className="text-2xl font-bold text-gradient bg-gradient-to-r from-accent to-purple bg-clip-text text-transparent">
+                Anchored in Quality
+              </h3>
+              <p className="text-muted-foreground max-w-sm">
+                Every bounty, every reward, every line of code - crafted with precision and passion for the crypto community.
+              </p>
+            </motion.div>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 3.2, duration: 0.6 }}
+            className="relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple/20 to-accent/20 blur-2xl animate-pulse-slow -z-10 rounded-full" />
+            <p className="text-lg text-muted-foreground italic max-w-2xl mx-auto relative z-10">
+              "Setting sail on the blockchain seas, we navigate through challenges and storms 
+              to deliver treasure-worthy bounty experiences for all crypto adventurers."
+            </p>
+            <div className="mt-6 text-sm text-primary/70 font-medium">
+              — Team Rizzo, Digital Ocean Explorers
+            </div>
+          </motion.div>
+        </motion.div>
+      </section>
+
       {/* Footer */}
       <footer className="relative border-t border-primary/30 bg-card backdrop-blur-sm">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-transparent to-accent/8 animate-pulse-slow" />
@@ -320,9 +652,13 @@ export function HomePageClient() {
               >
                 Create
               </Link>
-              <div className="text-sm opacity-60">
-                Built with ⚡ for the crypto community
-              </div>
+              <motion.div 
+                className="text-sm opacity-60"
+                whileHover={{ opacity: 100, scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                ⚓ Crafted by Team Rizzo ⚓
+              </motion.div>
             </div>
           </div>
         </div>

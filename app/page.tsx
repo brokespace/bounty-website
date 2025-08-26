@@ -9,9 +9,9 @@ export default async function HomePage() {
   const session = await getServerSession(authOptions)
   
   // If user is logged in, redirect to bounties
-  if (session) {
-    redirect('/bounties')
-  }
+  // if (session) {
+  //   redirect('/bounties')
+  // }
 
   return (
     <div className="min-h-screen bg-animated relative overflow-x-hidden">
