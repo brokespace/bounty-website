@@ -1,12 +1,12 @@
 generator client {
-    provider = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/rizzo/bounty-website/node_modules/.prisma/client"
+  provider      = "prisma-client-js"
+  output        = "/home/rizzo/bounty-website/node_modules/.prisma/client"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -15,15 +15,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -37,23 +36,23 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  hotkey        String    @unique // Crypto address (wallet address)
-  username      String?   @unique
-  password      String    // Hashed password
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  isActive      Boolean   @default(true)
-  isAdmin       Boolean   @default(false)
-  
-  // Relations
-  accounts      Account[]
-  sessions      Session[]
-  bounties      Bounty[]
-  submissions   Submission[]
-  votes         Vote[]
+  id                String            @id @default(cuid())
+  hotkey            String?           @unique
+  username          String?           @unique
+  email             String?           @unique
+  walletAddress     String?
+  password          String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  isActive          Boolean           @default(true)
+  isAdmin           Boolean           @default(false)
+  accounts          Account[]
+  sessions          Session[]
+  bounties          Bounty[]
+  submissions       Submission[]
   suggestedBounties SuggestedBounty[]
-  
+  votes             Vote[]
+
   @@map("users")
 }
 
@@ -65,6 +64,151 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Bounty {
+  id                      String                  @id @default(cuid())
+  title                   String
+  description             String
+  requirements            String
+  alphaReward             Decimal                 @db.Decimal(18, 8)
+  alphaRewardCap          Decimal                 @db.Decimal(18, 8)
+  rewardDistribution      RewardDistribution      @default(ALL_AT_ONCE)
+  winningSpots            Int                     @default(1)
+  status                  BountyStatus            @default(DRAFT)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  deadline                DateTime?
+  creatorId               String
+  acceptedSubmissionTypes SubmissionContentType[] @default([FILE])
+  creator                 User                    @relation(fields: [creatorId], references: [id])
+  submissions             Submission[]
+  suggestedBounty         SuggestedBounty?
+  categories              BountyCategory[]        @relation("BountyToBountyCategory")
+  screenerSupports ScreenerBountySupport[]
+
+  @@map("bounties")
+}
+
+model BountyCategory {
+  id                String            @id @default(cuid())
+  name              String            @unique
+  color             String?
+  createdAt         DateTime          @default(now())
+  suggestedBounties SuggestedBounty[] @relation("BountyCategoryToSuggestedBounty")
+  bounties          Bounty[]          @relation("BountyToBountyCategory")
+  screenerSupports ScreenerBountySupport[]
+
+  @@map("bounty_categories")
+}
+
+model Submission {
+  id             String                @id @default(cuid())
+  title          String
+  description    String
+  status         SubmissionStatus      @default(PENDING)
+  score          Decimal?              @db.Decimal(5, 2)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  validatedAt    DateTime?
+  bountyId       String
+  submitterId    String
+  contentType    SubmissionContentType @default(FILE)
+  textContent    String?
+  urls           String[]              @default([])
+  tosAccepted    Boolean               @default(false)
+  tosAcceptedAt  DateTime?
+  files          SubmissionFile[]
+  bounty         Bounty                @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  submitter      User                  @relation(fields: [submitterId], references: [id])
+  validationLogs ValidationLog[]
+  votes          Vote[]
+
+  scoredBy     String[]     @default([]) // List of screener IDs that have scored this
+  scoringJobs  ScoringJob[]
+
+  @@map("submissions")
+}
+
+model SubmissionFile {
+  id           String     @id @default(cuid())
+  originalName String
+  filename     String
+  filepath     String
+  filesize     BigInt
+  mimeType     String
+  fileType     FileType   @default(OTHER)
+  uploadedAt   DateTime   @default(now())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("submission_files")
+}
+
+model Vote {
+  id           String     @id @default(cuid())
+  type         VoteType
+  createdAt    DateTime   @default(now())
+  userId       String
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@unique([userId, submissionId])
+  @@map("votes")
+}
+
+model ValidationLog {
+  id           String           @id @default(cuid())
+  type         ValidationType
+  result       ValidationResult @default(PENDING)
+  score        Decimal?         @db.Decimal(5, 2)
+  notes        String?
+  validatorId  String?
+  createdAt    DateTime         @default(now())
+  submissionId String
+  submission   Submission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("validation_logs")
+}
+
+model SuggestedBounty {
+  id                      String                  @id @default(cuid())
+  title                   String
+  description             String
+  requirements            String
+  alphaReward             Decimal                 @db.Decimal(18, 8)
+  alphaRewardCap          Decimal                 @db.Decimal(18, 8)
+  rewardDistribution      RewardDistribution      @default(ALL_AT_ONCE)
+  winningSpots            Int                     @default(1)
+  acceptedSubmissionTypes SubmissionContentType[] @default([FILE])
+  status                  SuggestedBountyStatus   @default(PENDING)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  deadline                DateTime?
+  reviewedAt              DateTime?
+  reviewNotes             String?
+  convertedBountyId       String?                 @unique
+  suggestedById           String
+  convertedBounty         Bounty?                 @relation(fields: [convertedBountyId], references: [id])
+  suggestedBy             User                    @relation(fields: [suggestedById], references: [id])
+  categories              BountyCategory[]        @relation("BountyCategoryToSuggestedBounty")
+
+  @@map("suggested_bounties")
+}
+
+model Milestone {
+  id          String          @id @default(cuid())
+  title       String
+  description String
+  targetDate  DateTime?
+  completed   Boolean         @default(false)
+  completedAt DateTime?
+  isPublic    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("milestones")
+}
+
 enum BountyStatus {
   DRAFT
   ACTIVE
@@ -74,100 +218,29 @@ enum BountyStatus {
 }
 
 enum SuggestedBountyStatus {
-  PENDING     // Awaiting admin review
-  APPROVED    // Accepted by admin and converted to bounty
-  REJECTED    // Rejected by admin
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum RewardDistribution {
-  ALL_AT_ONCE    // 60% all at once
-  OVER_TIME      // 100% over time
+  ALL_AT_ONCE
+  OVER_TIME
 }
 
 enum SubmissionContentType {
-  URL       // URL links (GitHub repos, live demos, etc.)
-  FILE      // File uploads
-  TEXT      // Text-based submissions
-  MIXED     // Combination of the above
-}
-
-model Bounty {
-  id                    String              @id @default(cuid())
-  title                 String
-  description           String              @db.Text
-  requirements          String              @db.Text
-  
-  // Reward details
-  alphaReward           Decimal             @db.Decimal(18,8) // Current price in alpha
-  alphaRewardCap        Decimal             @db.Decimal(18,8) // Maximum cap in alpha
-  rewardDistribution    RewardDistribution  @default(ALL_AT_ONCE)
-  winningSpots          Int                 @default(1) // Number of winning positions
-  
-  // Submission requirements
-  acceptedSubmissionTypes SubmissionContentType[] @default([FILE]) // What types of submissions this bounty accepts
-  
-  status                BountyStatus        @default(DRAFT)
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  deadline              DateTime?           // Optional deadline
-  
-  // Relations
-  creatorId             String
-  creator               User                @relation(fields: [creatorId], references: [id])
-  submissions           Submission[]
-  categories            BountyCategory[]
-  suggestedBounty       SuggestedBounty?    // If this bounty was created from a suggestion
-  
-  @@map("bounties")
-}
-
-model BountyCategory {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  color     String?  // Hex color for UI
-  createdAt DateTime @default(now())
-  
-  bounties         Bounty[]
-  suggestedBounties SuggestedBounty[]
-  
-  @@map("bounty_categories")
+  URL
+  FILE
+  TEXT
+  MIXED
 }
 
 enum SubmissionStatus {
-  PENDING       // Awaiting validation
-  VALIDATING    // Under automated/manual validation
-  APPROVED      // Passed validation
-  REJECTED      // Failed validation
-  WINNER        // Selected as winner
-}
-
-model Submission {
-  id            String           @id @default(cuid())
-  title         String
-  description   String           @db.Text
-  
-  // Content fields
-  contentType   SubmissionContentType @default(FILE) // Type of submission content
-  urls          String[]         @default([]) // Array of URLs for URL submissions
-  textContent   String?          @db.Text // Additional text content
-  
-  status        SubmissionStatus @default(PENDING)
-  score         Decimal?         @db.Decimal(5,2) // Validation score (0-100)
-  
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  validatedAt   DateTime?        // When validation completed
-  
-  // Relations
-  bountyId      String
-  bounty        Bounty           @relation(fields: [bountyId], references: [id], onDelete: Cascade)
-  submitterId   String
-  submitter     User             @relation(fields: [submitterId], references: [id])
-  files         SubmissionFile[]
-  votes         Vote[]
-  validationLogs ValidationLog[]
-  
-  @@map("submissions")
+  PENDING
+  VALIDATING
+  APPROVED
+  REJECTED
+  WINNER
 }
 
 enum FileType {
@@ -179,49 +252,15 @@ enum FileType {
   OTHER
 }
 
-model SubmissionFile {
-  id            String     @id @default(cuid())
-  originalName  String     // Original filename
-  filename      String     // Stored filename
-  filepath      String     // Full path to file
-  filesize      BigInt     // File size in bytes
-  mimeType      String     // MIME type
-  fileType      FileType   @default(OTHER)
-  
-  uploadedAt    DateTime   @default(now())
-  
-  // Relations
-  submissionId  String
-  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  
-  @@map("submission_files")
-}
-
 enum VoteType {
   UPVOTE
   DOWNVOTE
 }
 
-model Vote {
-  id           String   @id @default(cuid())
-  type         VoteType
-  createdAt    DateTime @default(now())
-  
-  // Relations
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  submissionId String
-  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  
-  // Prevent duplicate votes
-  @@unique([userId, submissionId])
-  @@map("votes")
-}
-
 enum ValidationType {
-  AUTOMATED    // Automated validation
-  MANUAL       // Manual review
-  COMMUNITY    // Community voting
+  AUTOMATED
+  MANUAL
+  COMMUNITY
 }
 
 enum ValidationResult {
@@ -230,53 +269,67 @@ enum ValidationResult {
   PENDING
 }
 
-model ValidationLog {
-  id          String           @id @default(cuid())
-  type        ValidationType
-  result      ValidationResult @default(PENDING)
-  score       Decimal?         @db.Decimal(5,2) // 0-100 score
-  notes       String?          @db.Text
-  validatorId String?          // User who validated (for manual)
+
+model Screener {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  hotkey      String            @unique
+  apiUrl      String            // Base URL for the screener API
+  isActive    Boolean           @default(true)
+  priority    Int               @default(0) // Higher priority screeners are preferred
+  maxConcurrent Int             @default(5) // Max concurrent scoring jobs
+  currentJobs Int               @default(0) // Current active scoring jobs
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   
-  createdAt   DateTime         @default(now())
+  // Supported bounty categories and types
+  supportedBounties ScreenerBountySupport[]
+  scoringJobs       ScoringJob[]
   
-  // Relations
-  submissionId String
-  submission   Submission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  
-  @@map("validation_logs")
+  @@map("screeners")
 }
 
-model SuggestedBounty {
-  id                    String                   @id @default(cuid())
-  title                 String
-  description           String                   @db.Text
-  requirements          String                   @db.Text
+model ScreenerBountySupport {
+  id                String                  @id @default(cuid())
+  screenerId        String
+  bountyId          String?                 // Specific bounty support (optional)
+  categoryId        String?                 // Category-based support (optional)
+  submissionTypes   SubmissionContentType[] // Supported submission types
+  screener          Screener                @relation(fields: [screenerId], references: [id], onDelete: Cascade)
+  bounty            Bounty?                 @relation(fields: [bountyId], references: [id])
+  category          BountyCategory?         @relation(fields: [categoryId], references: [id])
   
-  // Reward details
-  alphaReward           Decimal                  @db.Decimal(18,8) // Suggested price in alpha
-  alphaRewardCap        Decimal                  @db.Decimal(18,8) // Maximum cap in alpha
-  rewardDistribution    RewardDistribution       @default(ALL_AT_ONCE)
-  winningSpots          Int                      @default(1) // Number of winning positions
+  @@unique([screenerId, bountyId])
+  @@unique([screenerId, categoryId])
+  @@map("screener_bounty_support")
+}
+
+model ScoringJob {
+  id            String              @id @default(cuid())
+  submissionId  String
+  screenerId    String
+  status        ScoringJobStatus    @default(PENDING)
+  score         Decimal?            @db.Decimal(5, 2)
+  startedAt     DateTime?
+  completedAt   DateTime?
+  errorMessage  String?
+  retryCount    Int                 @default(0)
+  maxRetries    Int                 @default(3)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
   
-  // Submission requirements
-  acceptedSubmissionTypes SubmissionContentType[] @default([FILE]) // What types of submissions this bounty accepts
+  submission    Submission          @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  screener      Screener            @relation(fields: [screenerId], references: [id])
   
-  status                SuggestedBountyStatus    @default(PENDING)
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
-  deadline              DateTime?                // Suggested deadline
-  
-  // Admin review fields
-  reviewedAt            DateTime?                // When admin reviewed
-  reviewNotes           String?                  @db.Text // Admin notes about approval/rejection
-  convertedBountyId     String?                  @unique // If approved, the ID of the created bounty
-  convertedBounty       Bounty?                  @relation(fields: [convertedBountyId], references: [id])
-  
-  // Relations
-  suggestedById         String
-  suggestedBy           User                     @relation(fields: [suggestedById], references: [id])
-  categories            BountyCategory[]
-  
-  @@map("suggested_bounties")
+  @@unique([submissionId, screenerId])
+  @@map("scoring_jobs")
+}
+
+enum ScoringJobStatus {
+  PENDING
+  ASSIGNED
+  SCORING
+  COMPLETED
+  FAILED
+  CANCELLED
 }

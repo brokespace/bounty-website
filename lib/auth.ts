@@ -1,80 +1,88 @@
 
 import NextAuth from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '@/lib/db'
-import bcrypt from 'bcryptjs'
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    CredentialsProvider({
-      name: 'crypto-auth',
-      credentials: {
-        hotkey: { label: 'Wallet Address', type: 'text' },
-        password: { label: 'Password', type: 'password' }
-      },
-      async authorize(credentials) {
-        if (!credentials?.hotkey || !credentials?.password) {
-          return null
-        }
-
-        try {
-          const user = await prisma.user.findUnique({
-            where: { hotkey: credentials.hotkey }
-          })
-
-          if (!user) {
-            return null
-          }
-
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
-
-          if (!isPasswordValid) {
-            return null
-          }
-
-          return {
-            id: user.id,
-            hotkey: user.hotkey,
-            username: user.username,
-            isActive: user.isActive,
-            isAdmin: user.isAdmin
-          }
-        } catch (error) {
-          console.error('Auth error:', error)
-          return null
-        }
-      }
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true,
     })
   ],
   session: {
     strategy: 'jwt' as const,
   },
   callbacks: {
-    async jwt({ token, user }: any) {
+    async signIn({ user, account, profile }: any) {
+      if (account?.provider === 'google') {
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email }
+          })
+          
+          if (!existingUser) {
+            // Generate random username
+            const randomUsername = `user_${Math.random().toString(36).substring(2, 8)}`
+            
+            await prisma.user.create({
+              data: {
+                email: user.email,
+                username: randomUsername,
+                isActive: true,
+                isAdmin: false
+              }
+            })
+          }
+          return true
+        } catch (error) {
+          console.error('Error creating user:', error)
+          return false
+        }
+      }
+      return true
+    },
+    async jwt({ token, user, account }: any) {
       if (user) {
-        token.hotkey = user.hotkey
         token.username = user.username
         token.isActive = user.isActive
         token.isAdmin = user.isAdmin
+        token.email = user.email
+        token.walletAddress = user.walletAddress
       }
       return token
     },
     async session({ session, token }: any) {
-      session.user = {
-        ...session.user,
-        id: token.sub,
-        hotkey: token.hotkey,
-        username: token.username,
-        isActive: token.isActive,
-        isAdmin: token.isAdmin
+      if (token.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email }
+        })
+        
+        session.user = {
+          ...session.user,
+          id: dbUser?.id || token.sub,
+          username: dbUser?.username,
+          email: dbUser?.email,
+          walletAddress: dbUser?.walletAddress,
+          isActive: dbUser?.isActive,
+          isAdmin: dbUser?.isAdmin
+        }
+      } else {
+        session.user = {
+          ...session.user,
+          id: token.sub,
+          username: token.username,
+          isActive: token.isActive,
+          isAdmin: token.isAdmin
+        }
       }
       return session
     }
   },
   pages: {
-    signIn: '/auth/signin',
-    signUp: '/auth/signup'
+    signIn: '/auth/signin'
   }
 }

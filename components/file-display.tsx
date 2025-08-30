@@ -34,8 +34,16 @@ export function FileDisplay({ files, className }: FileDisplayProps) {
     }
   }
 
-  const formatFileSize = (bytes: number | string): string => {
-    const size = typeof bytes === 'string' ? parseInt(bytes) : bytes
+  const formatFileSize = (bytes: number | string | bigint): string => {
+    let size: number
+    if (typeof bytes === 'string') {
+      size = parseInt(bytes)
+    } else if (typeof bytes === 'bigint') {
+      size = Number(bytes)
+    } else {
+      size = bytes
+    }
+    
     if (size === 0) return '0 Bytes'
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']

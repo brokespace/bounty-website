@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { SimpleNavigation } from '@/components/simple-navigation'
+import { Navigation } from '@/components/navigation'
 import { BountyCard } from '@/components/bounty-card'
 import { BountiesClient } from './_components/bounties-client'
 import { AnimatedSection } from '@/components/animated-section'
@@ -107,7 +107,7 @@ export default async function BountiesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-      <SimpleNavigation />
+      <Navigation />
       
       <main className="container mx-auto max-w-7xl px-4 py-8">
         {/* Header */}

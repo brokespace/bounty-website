@@ -37,11 +37,21 @@ export async function GET(
           select: {
             id: true,
             username: true,
-            hotkey: true
+            walletAddress: true
           }
         },
         files: true,
         votes: true,
+        scoringJobs: {
+          include: {
+            screener: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        },
         _count: {
           select: {
             votes: true
@@ -155,7 +165,7 @@ export async function POST(
           select: {
             id: true,
             username: true,
-            hotkey: true
+            walletAddress: true
           }
         },
         files: true

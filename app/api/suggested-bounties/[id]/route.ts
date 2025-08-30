@@ -27,7 +27,7 @@ export async function GET(
           select: {
             id: true,
             username: true,
-            hotkey: true
+            walletAddress: true
           }
         },
         categories: true,
@@ -160,7 +160,7 @@ export async function PUT(
               select: {
                 id: true,
                 username: true,
-                hotkey: true
+                walletAddress: true
               }
             },
             convertedBounty: {
@@ -203,7 +203,7 @@ export async function PUT(
             select: {
               id: true,
               username: true,
-              hotkey: true
+              walletAddress: true
             }
           }
         }

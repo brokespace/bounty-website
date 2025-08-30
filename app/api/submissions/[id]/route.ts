@@ -19,7 +19,7 @@ export async function GET(
           select: {
             id: true,
             username: true,
-            hotkey: true
+            walletAddress: true
           }
         },
         bounty: {
@@ -129,7 +129,7 @@ export async function PUT(
           select: {
             id: true,
             username: true,
-            hotkey: true
+            walletAddress: true
           }
         },
         files: true

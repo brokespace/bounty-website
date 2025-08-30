@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { SimpleNavigation } from '@/components/simple-navigation'
+import { Navigation } from '@/components/navigation'
 import { DashboardClient } from './_components/dashboard-client'
 
 export default async function DashboardPage() {
@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-      <SimpleNavigation />
+      <Navigation />
       <main className="container mx-auto max-w-7xl px-4 py-8">
         <DashboardClient 
           initialData={dashboardData}

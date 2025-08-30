@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
           select: {
             id: true,
             username: true,
-            hotkey: true
+            walletAddress: true
           }
         },
         categories: true,
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
           select: {
             id: true,
             username: true,
-            hotkey: true
+            walletAddress: true
           }
         },
         categories: true

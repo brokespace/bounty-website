@@ -33,7 +33,7 @@ interface SuggestedBounty {
   suggestedBy: {
     id: string
     username: string | null
-    hotkey: string
+    walletAddress: string | null
   }
   convertedBounty: {
     id: string
@@ -220,7 +220,7 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        {suggestion.suggestedBy.username || `User ${suggestion.suggestedBy.hotkey.slice(0, 8)}...`}
+                        {suggestion.suggestedBy.username || `User ${suggestion.suggestedBy.walletAddress?.slice(0, 8) || 'Unknown'}...`}
                       </span>
                       <span className="flex items-center gap-1">
                         <Coins className="w-4 h-4" />
@@ -280,7 +280,7 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
               <DialogHeader>
                 <DialogTitle>{selectedSuggestion.title}</DialogTitle>
                 <DialogDescription>
-                  Suggested by {selectedSuggestion.suggestedBy.username || `User ${selectedSuggestion.suggestedBy.hotkey.slice(0, 8)}...`} • 
+                  Suggested by {selectedSuggestion.suggestedBy.username || `User ${selectedSuggestion.suggestedBy.walletAddress?.slice(0, 8) || 'Unknown'}...`} • 
                   {formatDistanceToNow(new Date(selectedSuggestion.createdAt), { addSuffix: true })}
                 </DialogDescription>
               </DialogHeader>

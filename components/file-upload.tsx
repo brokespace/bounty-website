@@ -293,7 +293,7 @@ export function FileUpload({
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium truncate">
+                            <p className="text-sm font-medium truncate max-w-[200px]" title={file.originalName}>
                               {file.originalName}
                             </p>
                             <Badge variant="outline" className="text-xs">

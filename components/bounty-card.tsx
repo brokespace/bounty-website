@@ -23,7 +23,7 @@ interface BountyCardProps {
     submissionCount: number
     creator: {
       username: string
-      hotkey: string
+      walletAddress: string | null
     }
     categories?: Array<{
       name: string
@@ -158,12 +158,12 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
             {/* Creator */}
             <div className="pt-2 border-t border-muted/30">
               <div className="text-xs text-muted-foreground">
-                by @{bounty.creator.username || bounty.creator.hotkey.slice(0, 8)}
+                by @{bounty.creator.username || bounty.creator.walletAddress?.slice(0, 8) || 'Unknown'}
               </div>
             </div>
 
             {/* Action Button */}
-            <Link href={`/bounties/${bounty.id}/public`} className="block w-full">
+            <Link href={`/bounties/${bounty.id}`} className="block w-full">
               <Button 
                 className="w-full mt-3 bg-primary hover:bg-primary/90 transition-colors"
                 size="sm"

@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { SimpleNavigation } from '@/components/simple-navigation'
+import { Navigation } from '@/components/navigation'
 import { HomePageClient } from './_components/homepage-client'
 
 export default async function HomePage() {
@@ -31,7 +31,7 @@ export default async function HomePage() {
       </div>
       
       <div className="relative z-10">
-        <SimpleNavigation />
+        <Navigation />
         <HomePageClient />
       </div>
     </div>

@@ -104,7 +104,7 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
             Welcome back, <span className="text-primary">{user?.username || 'Hunter'}</span>
           </h1>
           <p className="text-lg text-muted-foreground">
-            {user?.hotkey}
+            {user?.walletAddress || user?.email || 'Complete your profile'}
           </p>
         </div>
         
@@ -399,7 +399,7 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
                           New submission on <span className="text-primary">{activity.bounty?.title}</span>
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          by @{activity.submitter?.username || activity.submitter?.hotkey?.slice(0, 8)}
+                          by @{activity.submitter?.username || activity.submitter?.walletAddress?.slice(0, 8) || 'Unknown'}
                         </p>
                       </div>
                       <div className="text-xs text-muted-foreground">
