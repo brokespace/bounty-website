@@ -172,6 +172,58 @@ export async function POST(
       }
     })
 
+    // Find a screener that supports this bounty
+    const screenerSupport = await prisma.screenerBountySupport.findFirst({
+      where: {
+        OR: [
+          // Direct bounty support
+          { bountyId: params.id },
+          // Category-based support
+          {
+            bountyId: null,
+            category: {
+              bounties: {
+                some: {
+                  id: params.id
+                }
+              }
+            }
+          }
+        ],
+        // Ensure the screener supports the submission content type
+        submissionTypes: {
+          hasSome: [contentType || 'FILE']
+        },
+        screener: {
+          isActive: true
+        }
+      },
+      include: {
+        screener: true
+      },
+      orderBy: {
+        screener: {
+          priority: 'desc'
+        }
+      }
+    })
+
+    // If we found a supporting screener, trigger processing
+    if (screenerSupport?.screener) {
+      try {
+        const processUrl = `${screenerSupport.screener.apiUrl}/process-submission/${submission.id}`
+        await fetch(processUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+      } catch (error) {
+        console.error('Failed to trigger screener processing:', error)
+        // Don't fail the submission creation if screener call fails
+      }
+    }
+
     return NextResponse.json({
       message: 'Submission created successfully',
       submission: {

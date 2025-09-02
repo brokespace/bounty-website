@@ -237,7 +237,7 @@ enum SubmissionContentType {
 
 enum SubmissionStatus {
   PENDING
-  VALIDATING
+  SCORING
   APPROVED
   REJECTED
   WINNER

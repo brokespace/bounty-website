@@ -19,7 +19,7 @@ export interface BountyStatus {
 
 export interface SubmissionStatus {
   PENDING: 'PENDING'
-  VALIDATING: 'VALIDATING'
+  SCORING: 'SCORING'
   APPROVED: 'APPROVED'
   REJECTED: 'REJECTED'
   WINNER: 'WINNER'

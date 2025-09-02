@@ -128,7 +128,7 @@ async function main() {
           data: {
             title: `Submission ${j + 1} for ${bountyTitles[i]}`,
             description: `This is a detailed submission addressing all requirements. Implementation includes modern best practices and thorough testing.`,
-            status: (['PENDING', 'APPROVED', 'VALIDATING', 'REJECTED'] as const)[Math.floor(Math.random() * 4)],
+            status: (['PENDING', 'APPROVED', 'SCORING', 'REJECTED'] as const)[Math.floor(Math.random() * 4)],
             score: Math.random() > 0.3 ? parseFloat((Math.random() * 100).toFixed(1)) : null,
             bountyId: bounty.id,
             submitterId: submitter.id
