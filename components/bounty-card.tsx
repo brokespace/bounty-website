@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, Trophy, Users, Coins, Target } from 'lucide-react'
+import { Calendar, Clock, Trophy, Users, Coins, Target, Medal, Keyboard } from 'lucide-react'
 import Link from 'next/link'
 
 interface BountyCardProps {
@@ -29,6 +29,13 @@ interface BountyCardProps {
       name: string
       color?: string
     }>
+    winningSpotConfigs?: Array<{
+      id: string
+      position: number
+      reward: string
+      rewardCap: string
+      hotkey: string
+    }>
   }
   index?: number
 }
@@ -47,6 +54,27 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
 
   const getRewardDistributionText = (distribution: string) => {
     return distribution === 'ALL_AT_ONCE' ? '60% at once' : '100% over time'
+  }
+
+  const getPositionLabel = (position: number) => {
+    const suffixes = ['st', 'nd', 'rd']
+    const remainder = position % 10
+    const hundredRemainder = position % 100
+    
+    if (hundredRemainder >= 11 && hundredRemainder <= 13) {
+      return `${position}th`
+    }
+    
+    return `${position}${suffixes[remainder - 1] || 'th'}`
+  }
+
+  const getPositionColor = (position: number) => {
+    switch (position) {
+      case 1: return 'text-yellow-500'
+      case 2: return 'text-gray-400' 
+      case 3: return 'text-amber-600'
+      default: return 'text-blue-500'
+    }
   }
 
   return (
@@ -104,25 +132,58 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
 
         <CardContent className="pt-0">
           <div className="space-y-3">
-            {/* Reward Information */}
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="flex items-center gap-2">
-                <Coins className="h-4 w-4 text-yellow-500" />
-                <div>
-                  <div className="font-medium">{bounty.alphaReward} α</div>
-                  <div className="text-xs text-muted-foreground">Current</div>
+            {/* Winning Spots Display */}
+            {bounty.winningSpotConfigs && bounty.winningSpotConfigs.length > 0 ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Medal className="h-4 w-4 text-primary" />
+                  <span>Winning Spots</span>
+                </div>
+                <div className="space-y-1">
+                  {bounty.winningSpotConfigs.slice(0, 3).map((spot) => (
+                    <div key={spot.id} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <Trophy className={`h-3 w-3 ${getPositionColor(spot.position)}`} />
+                        <span className="font-medium">{getPositionLabel(spot.position)}</span>
+                        <Badge variant="outline" className="text-xs px-1 py-0">
+                          <Keyboard className="h-2 w-2 mr-1" />
+                          {spot.hotkey}
+                        </Badge>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">{spot.reward} α</div>
+                        <div className="text-muted-foreground">cap: {spot.rewardCap} α</div>
+                      </div>
+                    </div>
+                  ))}
+                  {bounty.winningSpotConfigs.length > 3 && (
+                    <div className="text-xs text-muted-foreground text-center">
+                      +{bounty.winningSpotConfigs.length - 3} more spots
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-orange-500" />
-                <div>
-                  <div className="font-medium">{bounty.alphaRewardCap} α</div>
-                  <div className="text-xs text-muted-foreground">Cap</div>
+            ) : (
+              /* Fallback to legacy reward display */
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Coins className="h-4 w-4 text-yellow-500" />
+                  <div>
+                    <div className="font-medium">{bounty.alphaReward} α</div>
+                    <div className="text-xs text-muted-foreground">Current</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Target className="h-4 w-4 text-orange-500" />
+                  <div>
+                    <div className="font-medium">{bounty.alphaRewardCap} α</div>
+                    <div className="text-xs text-muted-foreground">Cap</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Distribution and Spots */}
+            {/* Distribution and Summary */}
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-1">
                 <Trophy className="h-4 w-4 text-purple-500" />
@@ -130,7 +191,9 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4 text-blue-500" />
-                <span className="text-xs">{bounty.winningSpots} {bounty.winningSpots === 1 ? 'winner' : 'winners'}</span>
+                <span className="text-xs">
+                  {bounty.winningSpotConfigs?.length || bounty.winningSpots} {(bounty.winningSpotConfigs?.length || bounty.winningSpots) === 1 ? 'winner' : 'winners'}
+                </span>
               </div>
             </div>
 

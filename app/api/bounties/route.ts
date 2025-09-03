@@ -41,6 +41,11 @@ export async function GET(req: NextRequest) {
           }
         },
         categories: true,
+        winningSpotConfigs: {
+          orderBy: {
+            position: 'asc'
+          }
+        },
         submissions: {
           select: {
             id: true,
@@ -64,7 +69,12 @@ export async function GET(req: NextRequest) {
       ...bounty,
       alphaReward: bounty.alphaReward.toString(),
       alphaRewardCap: bounty.alphaRewardCap.toString(),
-      submissionCount: bounty._count.submissions
+      submissionCount: bounty._count.submissions,
+      winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
+        ...spot,
+        reward: spot.reward.toString(),
+        rewardCap: spot.rewardCap.toString()
+      }))
     }))
 
     return NextResponse.json({ bounties: formattedBounties })
@@ -107,7 +117,8 @@ export async function POST(req: NextRequest) {
       winningSpots,
       deadline,
       categories,
-      acceptedSubmissionTypes
+      acceptedSubmissionTypes,
+      winningSpotConfigs
     } = await req.json()
 
     // Validate required fields
@@ -135,6 +146,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Validate winning spots if provided
+    if (winningSpotConfigs && Array.isArray(winningSpotConfigs) && winningSpotConfigs.length > 0) {
+      const hotkeys = winningSpotConfigs.map((spot: any) => spot.hotkey)
+      const duplicateHotkeys = hotkeys.filter((key: string, index: number) => hotkeys.indexOf(key) !== index)
+      if (duplicateHotkeys.length > 0) {
+        return NextResponse.json(
+          { error: `Duplicate hotkeys found: ${duplicateHotkeys.join(', ')}` },
+          { status: 400 }
+        )
+      }
+    }
+
     // Create bounty
     const bounty = await prisma.bounty.create({
       data: {
@@ -148,7 +171,15 @@ export async function POST(req: NextRequest) {
         deadline: deadline ? new Date(deadline) : null,
         acceptedSubmissionTypes: acceptedSubmissionTypes,
         creatorId: session.user.id,
-        status: 'ACTIVE'
+        status: 'ACTIVE',
+        winningSpotConfigs: winningSpotConfigs && winningSpotConfigs.length > 0 ? {
+          create: winningSpotConfigs.map((spot: any) => ({
+            position: spot.position,
+            reward: parseFloat(spot.reward),
+            rewardCap: parseFloat(spot.rewardCap),
+            hotkey: spot.hotkey
+          }))
+        } : undefined
       },
       include: {
         creator: {
@@ -158,7 +189,12 @@ export async function POST(req: NextRequest) {
             walletAddress: true
           }
         },
-        categories: true
+        categories: true,
+        winningSpotConfigs: {
+          orderBy: {
+            position: 'asc'
+          }
+        }
       }
     })
 
@@ -167,7 +203,12 @@ export async function POST(req: NextRequest) {
       bounty: {
         ...bounty,
         alphaReward: bounty.alphaReward.toString(),
-        alphaRewardCap: bounty.alphaRewardCap.toString()
+        alphaRewardCap: bounty.alphaRewardCap.toString(),
+        winningSpotConfigs: bounty.winningSpotConfigs?.map(spot => ({
+          ...spot,
+          reward: spot.reward.toString(),
+          rewardCap: spot.rewardCap.toString()
+        })) || []
       }
     }, { status: 201 })
 

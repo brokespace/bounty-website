@@ -23,6 +23,11 @@ export async function GET(
           }
         },
         categories: true,
+        winningSpotConfigs: {
+          orderBy: {
+            position: 'asc'
+          }
+        },
         submissions: {
           include: {
             submitter: {
@@ -58,6 +63,11 @@ export async function GET(
       ...bounty,
       alphaReward: bounty.alphaReward.toString(),
       alphaRewardCap: bounty.alphaRewardCap.toString(),
+      winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
+        ...spot,
+        reward: spot.reward.toString(),
+        rewardCap: spot.rewardCap.toString()
+      })),
       submissions: bounty.submissions.map(submission => ({
         ...submission,
         score: submission.score?.toString() || null,

@@ -89,156 +89,245 @@ export function ScoringJobDetailClient({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <Link 
-          href="/dashboard" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="flex items-center justify-between mb-8"
+      >
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 px-6 py-3 glass-effect hover:glow-border border border-primary/30 hover:border-primary/60 text-primary hover:text-accent transition-all duration-300 rounded-xl group transform hover:scale-105 shadow-lg shadow-primary/10"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-200" />
+          <span className="font-medium text-gradient">Back to Dashboard</span>
         </Link>
         
-        {isAdmin && (
-          <Badge variant="outline" className="bg-primary text-primary-foreground">
-            Admin View
-          </Badge>
-        )}
-      </div>
+      </motion.div>
 
-      {/* Scoring Job Header */}
+      {/* Enhanced Header Section */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative overflow-hidden border hover:border-primary/50 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 border-primary/30"
       >
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Badge className={getStatusColor(currentScoringJob.status)}>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(currentScoringJob.status)}
-                {currentScoringJob.status}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/8 to-purple/8 animate-gradient-shift" />
+        <div className="absolute -top-32 -left-32 w-64 h-64 bg-gradient-conic from-primary via-accent to-purple opacity-10 rounded-full blur-3xl animate-float" />
+        <div className="p-6 lg:p-8 relative z-10">
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 flex-wrap">
+                <Badge className={`${getStatusColor(currentScoringJob.status)} text-xs px-3 py-1 rounded-lg shadow-lg`}>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(currentScoringJob.status)}
+                    {currentScoringJob.status}
+                  </div>
+                </Badge>
+                <Badge variant="outline" className="text-xs px-3 py-1 rounded-lg glass-effect border-primary/30">
+                  Job #{currentScoringJob.id.slice(-8)}
+                </Badge>
               </div>
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              Scoring Job #{currentScoringJob.id.slice(-8)}
-            </span>
+              
+              <motion.h1
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-3xl lg:text-4xl font-bold leading-tight"
+              >
+                <span className="text-gradient animate-gradient bg-gradient-to-r from-primary via-accent to-purple bg-clip-text text-transparent">
+                  Scoring: {currentScoringJob.submission.title}
+                </span>
+              </motion.h1>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-purple/20 blur-2xl animate-pulse-slow -z-10 rounded-full" />
+                <p className="text-xl text-muted-foreground leading-relaxed relative z-10">
+                  Validation of submission for "{currentScoringJob.submission.bounty.title}"
+                </p>
+              </motion.div>
+            </div>
+
+            {/* Enhanced Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              <motion.div
+                whileHover={{ scale: 1.02, y: -1 }}
+                className="glass-effect border border-primary/30 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
+                    <Activity className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-primary">Screener</p>
+                    <p className="text-lg font-semibold text-gradient">{currentScoringJob.screener.name}</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.02, y: -1 }}
+                className="glass-effect border border-accent/30 rounded-xl p-4 hover:border-accent/50 transition-all duration-300 shadow-lg hover:shadow-accent/20"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-purple rounded-xl flex items-center justify-center shadow-lg">
+                    <Target className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-accent">Score</p>
+                    <p className="text-lg font-semibold text-gradient">
+                      {currentScoringJob.score ? `${currentScoringJob.score}/100` : 'Pending'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.02, y: -1 }}
+                className="glass-effect border border-purple/30 rounded-xl p-4 hover:border-purple/50 transition-all duration-300 shadow-lg hover:shadow-purple/20"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple to-primary rounded-xl flex items-center justify-center shadow-lg">
+                    <Calendar className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-purple-400">Created</p>
+                    <p className="text-lg font-semibold text-gradient">
+                      {new Date(currentScoringJob.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.02, y: -1 }}
+                className="glass-effect border border-primary/30 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
+                    <Clock className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-primary">Duration</p>
+                    <p className="text-lg font-semibold text-gradient">
+                      {currentScoringJob.completedAt && currentScoringJob.startedAt
+                        ? `${Math.round((new Date(currentScoringJob.completedAt).getTime() - new Date(currentScoringJob.startedAt).getTime()) / 60000)}m`
+                        : currentScoringJob.startedAt
+                        ? `${Math.round((Date.now() - new Date(currentScoringJob.startedAt).getTime()) / 60000)}m`
+                        : 'Not started'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
           </div>
-          
-          <h1 className="text-3xl font-bold tracking-tight">
-            Scoring: {currentScoringJob.submission.title}
-          </h1>
-          
-          <p className="text-lg text-muted-foreground">
-            Validation of submission for "{currentScoringJob.submission.bounty.title}"
-          </p>
-        </div>
-
-        {/* Key Information Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Screener</p>
-                  <p className="text-lg font-semibold">{currentScoringJob.screener.name}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Score</p>
-                  <p className="text-lg font-semibold">
-                    {currentScoringJob.score ? `${currentScoringJob.score}/100` : 'Pending'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Created</p>
-                  <p className="text-lg font-semibold">
-                    {new Date(currentScoringJob.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Duration</p>
-                  <p className="text-lg font-semibold">
-                    {currentScoringJob.completedAt && currentScoringJob.startedAt
-                      ? `${Math.round((new Date(currentScoringJob.completedAt).getTime() - new Date(currentScoringJob.startedAt).getTime()) / 60000)}m`
-                      : currentScoringJob.startedAt
-                      ? `${Math.round((Date.now() - new Date(currentScoringJob.startedAt).getTime()) / 60000)}m`
-                      : 'Not started'
-                    }
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </motion.div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Submission Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Submission Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">Title</Label>
-              <p className="text-lg font-semibold">{currentScoringJob.submission.title}</p>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Description</Label>
-              <p className="text-muted-foreground whitespace-pre-wrap">
-                {currentScoringJob.submission.description}
-              </p>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Submitter</Label>
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>@{currentScoringJob.submission.submitter.username || currentScoringJob.submission.submitter.walletAddress?.slice(0, 8)}</span>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="card-enhanced relative border border-primary/30 hover:border-primary/50 bg-card"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/8 to-purple/8 animate-gradient-shift" />
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl animate-float" />
+          <div className="p-6 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex items-center gap-3 mb-6"
+            >
+              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
+                <FileText className="h-5 w-5 text-primary" />
               </div>
-            </div>
+              <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-primary via-accent to-purple bg-clip-text text-transparent">
+                Submission Details
+              </h2>
+            </motion.div>
+            <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <Label className="text-sm font-bold text-primary mb-2 block">Title</Label>
+              <p className="text-lg font-bold text-gradient bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{currentScoringJob.submission.title}</p>
+            </motion.div>
 
-            <div>
-              <Label className="text-sm font-medium">Content Type</Label>
-              <div className="flex items-center gap-2">
-                {currentScoringJob.submission.contentType === 'URL' && <Link2 className="h-4 w-4 text-blue-500" />}
-                {currentScoringJob.submission.contentType === 'FILE' && <Upload className="h-4 w-4 text-green-500" />}
-                {currentScoringJob.submission.contentType === 'TEXT' && <Type className="h-4 w-4 text-purple-500" />}
-                {currentScoringJob.submission.contentType === 'MIXED' && <Trophy className="h-4 w-4 text-orange-500" />}
-                <span>{currentScoringJob.submission.contentType}</span>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <Label className="text-sm font-bold text-primary mb-2 block">Description</Label>
+              <div className="p-3 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-lg">
+                <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                  {currentScoringJob.submission.problem}
+                </p>
               </div>
-            </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Label className="text-sm font-bold text-primary mb-2 block">Submitter</Label>
+              <motion.div
+                whileHover={{ scale: 1.02, y: -1 }}
+                className="flex items-center gap-3 p-3 glass-effect border border-primary/30 rounded-lg hover:border-primary/50 transition-all duration-300"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-lg">
+                  <User className="h-4 w-4 text-white" />
+                </div>
+                <span className="font-medium text-gradient">@{currentScoringJob.submission.submitter.username || currentScoringJob.submission.submitter.walletAddress?.slice(0, 8)}</span>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <Label className="text-sm font-bold text-primary mb-2 block">Content Type</Label>
+              <motion.div
+                whileHover={{ scale: 1.02, y: -1 }}
+                className="flex items-center gap-3 p-3 glass-effect border border-accent/30 rounded-lg hover:border-accent/50 transition-all duration-300"
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
+                    currentScoringJob.submission.contentType === 'URL' ? 'bg-gradient-to-br from-blue-500 to-cyan-500' :
+                    currentScoringJob.submission.contentType === 'FILE' ? 'bg-gradient-to-br from-green-500 to-emerald-500' :
+                    currentScoringJob.submission.contentType === 'TEXT' ? 'bg-gradient-to-br from-purple-500 to-pink-500' :
+                    'bg-gradient-to-br from-orange-500 to-yellow-500'
+                  }`}
+                >
+                  {currentScoringJob.submission.contentType === 'URL' && <Link2 className="h-4 w-4 text-white" />}
+                  {currentScoringJob.submission.contentType === 'FILE' && <Upload className="h-4 w-4 text-white" />}
+                  {currentScoringJob.submission.contentType === 'TEXT' && <Type className="h-4 w-4 text-white" />}
+                  {currentScoringJob.submission.contentType === 'MIXED' && <Trophy className="h-4 w-4 text-white" />}
+                </div>
+                <span className="font-bold text-gradient">{currentScoringJob.submission.contentType}</span>
+              </motion.div>
+            </motion.div>
 
             {/* Display URLs if any */}
             {currentScoringJob.submission.urls && currentScoringJob.submission.urls.length > 0 && (
@@ -283,18 +372,34 @@ export function ScoringJobDetailClient({
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Scoring Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Scoring Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="card-enhanced relative border border-accent/30 hover:border-accent/50 bg-card"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/8 via-purple/8 to-primary/8 animate-gradient-shift" />
+          <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-gradient-to-br from-accent/20 to-purple/20 rounded-full blur-3xl animate-pulse-slow" />
+          <div className="p-6 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="flex items-center gap-3 mb-6"
+            >
+              <div className="p-3 rounded-xl bg-gradient-to-br from-accent/20 to-purple/20">
+                <Activity className="h-5 w-5 text-accent" />
+              </div>
+              <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-accent via-primary to-purple bg-clip-text text-transparent">
+                Scoring Information
+              </h2>
+            </motion.div>
+            <div className="space-y-4">
             <div>
               <Label className="text-sm font-medium">Screener Details</Label>
               <div className="space-y-2 mt-2">
@@ -321,35 +426,43 @@ export function ScoringJobDetailClient({
 
             <Separator />
 
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Timeline</Label>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Created:</span>
-                  <span className="font-medium">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.1 }}
+              className="space-y-4"
+            >
+              <Label className="text-sm font-bold text-accent flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Timeline
+              </Label>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 glass-effect border border-accent/20 rounded-lg hover:border-accent/40 transition-all duration-300">
+                  <span className="text-sm font-medium text-accent">Created:</span>
+                  <span className="font-bold text-gradient">
                     {new Date(currentScoringJob.createdAt).toLocaleString()}
                   </span>
                 </div>
                 
                 {currentScoringJob.startedAt && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Started:</span>
-                    <span className="font-medium">
+                  <div className="flex items-center justify-between p-3 glass-effect border border-primary/20 rounded-lg hover:border-primary/40 transition-all duration-300">
+                    <span className="text-sm font-medium text-primary">Started:</span>
+                    <span className="font-bold text-gradient">
                       {new Date(currentScoringJob.startedAt).toLocaleString()}
                     </span>
                   </div>
                 )}
                 
                 {currentScoringJob.completedAt && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Completed:</span>
-                    <span className="font-medium">
+                  <div className="flex items-center justify-between p-3 glass-effect border border-green-500/20 rounded-lg hover:border-green-500/40 transition-all duration-300">
+                    <span className="text-sm font-medium text-green-600">Completed:</span>
+                    <span className="font-bold text-gradient">
                       {new Date(currentScoringJob.completedAt).toLocaleString()}
                     </span>
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
 
             <Separator />
 
@@ -365,53 +478,109 @@ export function ScoringJobDetailClient({
 
             {currentScoringJob.errorMessage && (
               <>
-                <Separator />
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-red-600">Error Message</Label>
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-sm text-red-800">{currentScoringJob.errorMessage}</p>
-                  </div>
-                </div>
+                <Separator className="bg-gradient-to-r from-transparent via-red-300/50 to-transparent" />
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.3 }}
+                  className="space-y-3"
+                >
+                  <Label className="text-sm font-bold text-red-600 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    Error Message
+                  </Label>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="p-4 bg-gradient-to-br from-red-50/80 via-pink-50/80 to-red-100/80 border border-red-300/50 rounded-xl shadow-lg backdrop-blur-sm"
+                  >
+                    <p className="text-sm text-red-800 leading-relaxed font-medium">{currentScoringJob.errorMessage}</p>
+                  </motion.div>
+                </motion.div>
               </>
             )}
 
             {currentScoringJob.score && (
               <>
-                <Separator />
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Final Score</Label>
-                  <div className="text-center p-4 bg-green-50 border border-green-200 rounded-md">
-                    <div className="text-3xl font-bold text-green-700">
+                <Separator className="bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.4 }}
+                  className="space-y-3"
+                >
+                  <Label className="text-sm font-bold text-green-600">Final Score</Label>
+                  <motion.div
+                    animate={{ scale: [1, 1.02, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="text-center p-6 bg-gradient-to-br from-green-500/20 via-emerald-500/15 to-green-600/20 border border-green-400/40 rounded-xl shadow-lg backdrop-blur-sm"
+                  >
+                    <div className="text-4xl font-bold text-green-400">
                       {currentScoringJob.score}/100
                     </div>
-                  </div>
-                </div>
+                    <p className="text-sm text-green-300 mt-2 font-medium">Validation Complete</p>
+                  </motion.div>
+                </motion.div>
               </>
             )}
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Bounty Context */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5" />
-            Related Bounty
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-lg">{currentScoringJob.submission.bounty.title}</h3>
-              <p className="text-muted-foreground">{currentScoringJob.submission.bounty.description}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+        className="card-enhanced relative border border-purple/30 hover:border-purple/50 bg-card"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-purple/8 via-primary/8 to-accent/8 animate-gradient-shift" />
+        <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-gradient-to-br from-purple/20 to-primary/20 rounded-full blur-3xl animate-float" />
+        <div className="p-6 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="flex items-center gap-3 mb-6"
+          >
+                          <div className="p-3 rounded-xl bg-gradient-to-br from-purple/20 to-primary/20">
+                <Trophy className="h-5 w-5 text-purple-400" />
+              </div>
+            <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-purple via-primary to-accent bg-clip-text text-transparent">
+              Related Bounty
+            </h2>
+          </motion.div>
+          <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <motion.h3
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.0 }}
+                  className="font-bold text-xl text-gradient bg-gradient-to-r from-purple to-primary bg-clip-text text-transparent mb-2"
+                >
+                  {currentScoringJob.submission.bounty.title}
+                </motion.h3>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.2 }}
+                  className="text-muted-foreground leading-relaxed"
+                >
+                  {currentScoringJob.submission.bounty.description}
+                </motion.p>
+              </div>
+              <Link href={`/bounties/${currentScoringJob.submission.bounty.id}`}>
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button variant="outline" className="glass-effect border border-purple/30 hover:border-purple/60 text-purple-400 hover:text-purple-300 hover:bg-purple/10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple/20">
+                    View Bounty
+                  </Button>
+                </motion.div>
+              </Link>
             </div>
-            <Link href={`/bounties/${currentScoringJob.submission.bounty.id}`}>
-              <Button variant="outline">
-                View Bounty
-              </Button>
-            </Link>
-          </div>
           
           {currentScoringJob.submission.bounty.requirements && (
             <div>
@@ -421,11 +590,18 @@ export function ScoringJobDetailClient({
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Live Logs */}
-      <LogStream jobId={currentScoringJob.id} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+      >
+        <LogStream jobId={currentScoringJob.id} />
+      </motion.div>
     </div>
   )
 }

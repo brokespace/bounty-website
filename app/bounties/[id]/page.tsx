@@ -30,17 +30,41 @@ export default async function BountyPage({ params }: BountyPageProps) {
   const isAuthenticated = !!session?.user?.id
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-      <Navigation />
-      <main className="container mx-auto max-w-6xl px-4 py-8">
-        <UnifiedBountyClient 
-          bounty={{ id: params.id, ...bountyData }}
-          user={session?.user}
-          isOwner={isOwner}
-          isAdmin={isAdmin}
-          isAuthenticated={isAuthenticated}
+    <div className="min-h-screen bg-animated relative overflow-x-hidden">
+      {/* Animated grid background */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 animate-gradient-shift" />
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px'
+          }}
         />
-      </main>
+      </div>
+
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute top-3/4 right-1/4 w-48 h-48 bg-accent/5 rounded-full blur-2xl animate-float" />
+        <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-purple/5 rounded-full blur-xl animate-pulse" />
+      </div>
+      
+      <div className="relative z-10">
+        <Navigation />
+        <main className="container mx-auto max-w-6xl px-4 py-8">
+          <UnifiedBountyClient 
+            bounty={{ id: params.id, ...bountyData }}
+            user={session?.user}
+            isOwner={isOwner}
+            isAdmin={isAdmin}
+            isAuthenticated={isAuthenticated}
+          />
+        </main>
+      </div>
     </div>
   )
 }

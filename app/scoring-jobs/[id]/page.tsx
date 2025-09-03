@@ -27,7 +27,8 @@ export default async function ScoringJobPage({ params }: Props) {
               title: true, 
               id: true, 
               creatorId: true,
-              description: true,
+              info: true,
+              problem: true,
               requirements: true 
             }
           },

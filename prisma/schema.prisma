@@ -67,8 +67,9 @@ model VerificationToken {
 model Bounty {
   id                      String                  @id @default(cuid())
   title                   String
-  description             String
-  requirements            String
+  problem                 String                  // Short description of the problem
+  info                    String                  // Technical details of how a submission is graded, file formats, etc
+  requirements            String                  // Requirements for bounty completion
   alphaReward             Decimal                 @db.Decimal(18, 8)
   alphaRewardCap          Decimal                 @db.Decimal(18, 8)
   rewardDistribution      RewardDistribution      @default(ALL_AT_ONCE)
@@ -83,7 +84,8 @@ model Bounty {
   submissions             Submission[]
   suggestedBounty         SuggestedBounty?
   categories              BountyCategory[]        @relation("BountyToBountyCategory")
-  screenerSupports ScreenerBountySupport[]
+  screenerSupports        ScreenerBountySupport[]
+  winningSpotConfigs      WinningSpot[]
 
   @@map("bounties")
 }
@@ -332,4 +334,19 @@ enum ScoringJobStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+model WinningSpot {
+  id            String  @id @default(cuid())
+  position      Int     // 1st, 2nd, 3rd place etc.
+  reward        Decimal @db.Decimal(18, 8)
+  rewardCap     Decimal @db.Decimal(18, 8)
+  hotkey        String  // e.g., "1", "2", "3" or "F1", "F2", etc.
+  createdAt     DateTime @default(now())
+  bountyId      String
+  bounty        Bounty  @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  
+  @@unique([bountyId, position])
+  @@unique([bountyId, hotkey])
+  @@map("winning_spots")
 }

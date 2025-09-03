@@ -100,6 +100,39 @@ declare module "next-auth" {
   }
 }
 
+export interface WinningSpot {
+  id: string
+  position: number
+  reward: string
+  rewardCap: string
+  hotkey: string
+  bountyId: string
+}
+
+export interface BountyWithWinningSpots {
+  id: string
+  title: string
+  description: string
+  requirements: string
+  alphaReward: string
+  alphaRewardCap: string
+  rewardDistribution: 'ALL_AT_ONCE' | 'OVER_TIME'
+  winningSpots: number
+  status: string
+  deadline?: string
+  createdAt: string
+  submissionCount: number
+  creator: {
+    username: string
+    walletAddress: string | null
+  }
+  categories?: Array<{
+    name: string
+    color?: string
+  }>
+  winningSpotConfigs: WinningSpot[]
+}
+
 declare module "next-auth/jwt" {
   interface JWT {
     username: string | null
