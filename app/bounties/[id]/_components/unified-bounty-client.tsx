@@ -322,10 +322,12 @@ export function UnifiedBountyClient({
                           transition={{ duration: 0.2 }}
                         >
                           {job.status === 'COMPLETED' ? (
-                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 shadow-sm hover:bg-emerald-100 transition-all">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Scored by {job.screener.name}
-                            </Badge>
+                            <Link href={`/scoring-jobs/${job.id}`}>
+                              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 shadow-sm hover:bg-emerald-100 transition-all">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Scored by {job.screener.name}
+                              </Badge>
+                            </Link>
                           ) : job.status === 'SCORING' ? (
                             <Link href={`/scoring-jobs/${job.id}`}>
                               <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100 cursor-pointer shadow-sm transition-all animate-pulse">
@@ -358,7 +360,7 @@ export function UnifiedBountyClient({
               {/* Status Indicator & Admin Actions */}
               <div className="flex flex-col items-center gap-3">
                 <div className={`w-3 h-3 rounded-full ${
-                  submission.status === 'WINNER' ? 'bg-purple-500 shadow-purple-500/50' :
+                submission.status === 'WINNER' ? 'bg-purple-500 shadow-purple-500/50' :
                   submission.status === 'APPROVED' ? 'bg-green-500 shadow-green-500/50' :
                   submission.status === 'REJECTED' ? 'bg-red-500 shadow-red-500/50' :
                   'bg-orange-500 shadow-orange-500/50'

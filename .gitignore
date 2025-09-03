@@ -8,6 +8,7 @@
 .next/*
 .env
 
+
 # testing
 /coverage
 
@@ -19,6 +20,7 @@
 /build
 .env.local
 .env.production
+.env.development
 # misc
 .DS_Store
 *.pem
