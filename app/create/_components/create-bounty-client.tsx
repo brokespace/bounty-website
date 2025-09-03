@@ -37,7 +37,8 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
+    problem: '',
+    info: '',
     requirements: '',
     alphaReward: '',
     alphaRewardCap: '',
@@ -55,7 +56,7 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
 
     try {
       // Validation
-      if (!formData.title || !formData.description || !formData.requirements) {
+      if (!formData.title || !formData.problem || !formData.info || !formData.requirements) {
         toast.error('Please fill in all required fields')
         return
       }
@@ -250,15 +251,29 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">
-                  Description <span className="text-red-500">*</span>
+                <Label htmlFor="problem">
+                  Problem Description <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
-                  id="description"
-                  placeholder="Provide a detailed description of what you're looking for..."
+                  id="problem"
+                  placeholder="Provide a short description of the problem you want solved..."
+                  rows={3}
+                  value={formData.problem}
+                  onChange={(e) => handleInputChange('problem', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="info">
+                  Technical Information <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="info"
+                  placeholder="Technical details of how submissions will be graded, required file formats, evaluation criteria, etc..."
                   rows={4}
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  value={formData.info}
+                  onChange={(e) => handleInputChange('info', e.target.value)}
                   required
                 />
               </div>

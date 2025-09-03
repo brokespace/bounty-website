@@ -109,7 +109,8 @@ export async function POST(req: NextRequest) {
 
     const {
       title,
-      description,
+      problem,
+      info,
       requirements,
       alphaReward,
       alphaRewardCap,
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest) {
     } = await req.json()
 
     // Validate required fields
-    if (!title || !description || !requirements || !alphaReward || !alphaRewardCap) {
+    if (!title || !problem || !info || !requirements || !alphaReward || !alphaRewardCap) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -162,7 +163,8 @@ export async function POST(req: NextRequest) {
     const bounty = await prisma.bounty.create({
       data: {
         title,
-        description,
+        problem,
+        info,
         requirements,
         alphaReward: parseFloat(alphaReward),
         alphaRewardCap: parseFloat(alphaRewardCap),
