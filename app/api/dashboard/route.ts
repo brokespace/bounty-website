@@ -55,6 +55,16 @@ export async function GET(req: NextRequest) {
             status: true
           }
         },
+        scoringJobs: {
+          include: {
+            screener: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        },
         _count: {
           select: {
             votes: true
