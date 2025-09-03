@@ -208,8 +208,12 @@ export async function POST(
       }
     })
 
+    // Check if this submission expects files to be uploaded
+    const expectsFiles = contentType === 'FILE' || contentType === 'MIXED'
+    
     // If we found a supporting screener, trigger processing
-    if (screenerSupport?.screener) {
+    // Only trigger immediately if no files are expected
+    if (screenerSupport?.screener && !expectsFiles) {
       try {
         const processUrl = `${screenerSupport.screener.apiUrl}/process-submission/${submission.id}`
         await fetch(processUrl, {

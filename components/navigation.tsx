@@ -46,19 +46,21 @@ export function Navigation({ className }: NavigationProps) {
       className={`sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${className || ''}`}
     >
       <div className="container mx-auto max-w-7xl flex h-16 items-center px-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2"
-          >
-            <Wallet className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              BountyHunter
-            </span>
-          </motion.div>
-        </Link>
+        {/* Logo - always on the far left */}
+        <div className="flex-shrink-0 flex items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2"
+            >
+              <Wallet className="h-6 w-6 text-primary" />
+              <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                BountyHunter
+              </span>
+            </motion.div>
+          </Link>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
@@ -79,7 +81,7 @@ export function Navigation({ className }: NavigationProps) {
         </nav>
 
         {/* User Menu / Auth */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           {status === 'loading' ? (
             <div className="h-8 w-8 animate-pulse bg-muted rounded-full" />
           ) : session?.user ? (

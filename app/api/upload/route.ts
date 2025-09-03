@@ -86,6 +86,74 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    // After successful file upload, trigger screener processing
+    try {
+      // Get the submission with bounty info to find supporting screener
+      const submissionWithBounty = await prisma.submission.findUnique({
+        where: { id: submissionId },
+        include: {
+          bounty: true
+        }
+      })
+
+      if (submissionWithBounty) {
+        // Find a screener that supports this bounty
+        const screenerSupport = await prisma.screenerBountySupport.findFirst({
+          where: {
+            OR: [
+              // Direct bounty support
+              { bountyId: submissionWithBounty.bountyId },
+              // Category-based support
+              {
+                bountyId: null,
+                category: {
+                  bounties: {
+                    some: {
+                      id: submissionWithBounty.bountyId
+                    }
+                  }
+                }
+              }
+            ],
+            // Ensure the screener supports the submission content type
+            submissionTypes: {
+              hasSome: [submissionWithBounty.contentType || 'FILE']
+            },
+            screener: {
+              isActive: true
+            }
+          },
+          include: {
+            screener: true
+          },
+          orderBy: {
+            screener: {
+              priority: 'desc'
+            }
+          }
+        })
+
+        // If we found a supporting screener, trigger processing
+        if (screenerSupport?.screener) {
+          try {
+            const processUrl = `${screenerSupport.screener.apiUrl}/process-submission/${submissionId}`
+            await fetch(processUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+          } catch (error) {
+            console.error('Failed to trigger screener processing after file upload:', error)
+            // Don't fail the upload if screener call fails
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to trigger post-upload processing:', error)
+      // Don't fail the upload if screener lookup fails
+    }
+
     return NextResponse.json({
       message: `${uploadedFiles.length} files uploaded successfully`,
       files: uploadedFiles
