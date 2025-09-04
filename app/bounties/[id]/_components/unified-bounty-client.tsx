@@ -471,7 +471,7 @@ export function UnifiedBountyClient({
                   >
                     <FileText className="h-4 w-4 text-emerald-400" />
                     <span className="text-sm font-medium text-gradient">
-                      {shouldAnonymize ? '📁 Has attachments' : `📁 ${submission.files.length} ${submission.files.length === 1 ? 'file' : 'files'}`}
+                      {shouldAnonymize ? 'Has attachments' : `${submission.files.length} ${submission.files.length === 1 ? 'file' : 'files'}`}
                     </span>
                   </motion.div>
                 )}
@@ -825,7 +825,7 @@ export function UnifiedBountyClient({
                                 <div className="text-right">
                                   <div className="flex items-center gap-1">
                                     <Coins className="h-4 w-4 text-yellow-600" />
-                                    <span className="font-bold text-gray-900">{spot.reward}</span>
+                                    <span className="font-bold text-gray-200">{spot.reward}</span>
                                     <span className="text-sm text-gray-500">α</span>
                                   </div>
                                 </div>
@@ -843,7 +843,7 @@ export function UnifiedBountyClient({
                         <div className="text-center">
                           <div className="flex items-center justify-center gap-2 mb-2">
                             <Coins className="h-6 w-6 text-yellow-600" />
-                            <div className="text-2xl font-bold text-gray-900">
+                            <div className="text-2xl font-bold text-gray-200">
                               {currentBounty.winningSpotConfigs[0]?.reward || currentBounty?.alphaReward || '0'} α
                             </div>
                           </div>
@@ -855,7 +855,7 @@ export function UnifiedBountyClient({
                         <div className="text-center">
                           <div className="flex items-center justify-center gap-2 mb-2">
                             <Coins className="h-6 w-6 text-yellow-600" />
-                            <div className="text-2xl font-bold text-gray-900">
+                            <div className="text-2xl font-bold text-gray-200">
                               {currentBounty?.alphaReward || '0'} α
                             </div>
                           </div>

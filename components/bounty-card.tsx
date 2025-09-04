@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, Trophy, Users, Coins, Target, Medal, Keyboard } from 'lucide-react'
+import { Calendar, Clock, Trophy, Users, Coins, Medal, Key, User, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 interface BountyCardProps {
@@ -43,12 +43,12 @@ interface BountyCardProps {
 export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ACTIVE': return 'bg-green-500'
-      case 'COMPLETED': return 'bg-blue-500'
-      case 'PAUSED': return 'bg-yellow-500'
-      case 'CANCELLED': return 'bg-red-500'
-      default: return 'bg-gray-500'
+    switch (status?.toUpperCase()) {
+      case 'ACTIVE': return 'bg-green-500 text-white'
+      case 'COMPLETED': return 'bg-blue-500 text-white'
+      case 'PAUSED': return 'bg-yellow-500 text-white'
+      case 'CANCELLED': return 'bg-red-500 text-white'
+      default: return 'bg-gray-500 text-white'
     }
   }
 
@@ -79,164 +79,196 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
       whileInView={{ 
         opacity: 1, 
         y: 0, 
         scale: 1,
         transition: {
-          duration: 0.8,
-          delay: 0,
-          ease: [0.25, 0.46, 0.45, 0.94]
+          duration: 0.3,
+          delay: index * 0.03,
+          ease: "easeOut"
         }
       }}
-      viewport={{ once: true, margin: "0px 0px -5% 0px" }}
+      viewport={{ once: true, margin: "0px 0px -20% 0px" }}
       whileHover={{ 
-        y: -12,
+        y: -8,
         scale: 1.02,
         transition: { duration: 0.3 }
       }}
-      className="h-full"
+      className="h-full group"
     >
-      <Card className="h-full hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-muted/50 bg-card/50 backdrop-blur-sm transform-gpu">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <Badge 
-              variant="secondary" 
-              className={`${getStatusColor(bounty.status)} text-white text-xs`}
-            >
-              {bounty.status}
-            </Badge>
-            <div className="flex gap-1 flex-wrap">
-              {bounty.categories?.slice(0, 2)?.map((category) => (
-                <Badge 
-                  key={category.name} 
-                  variant="outline" 
-                  className="text-xs"
-                  style={{ borderColor: category.color || undefined }}
-                >
-                  {category.name}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          
-          <CardTitle className="text-lg leading-tight line-clamp-2">
-            {bounty.title}
-          </CardTitle>
-          
-          <p className="text-sm text-muted-foreground line-clamp-3 mt-2">
-            {bounty.description}
-          </p>
-        </CardHeader>
-
-        <CardContent className="pt-0">
-          <div className="space-y-3">
-            {/* Winning Spots Display */}
-            {bounty.winningSpotConfigs && bounty.winningSpotConfigs.length > 0 ? (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Medal className="h-4 w-4 text-primary" />
-                  <span>Winning Spots</span>
-                </div>
-                <div className="space-y-1">
-                  {bounty.winningSpotConfigs.slice(0, 3).map((spot) => (
-                    <div key={spot.id} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <Trophy className={`h-3 w-3 ${getPositionColor(spot.position)}`} />
-                        <span className="font-medium">{getPositionLabel(spot.position)}</span>
-                        <Badge variant="outline" className="text-xs px-1 py-0">
-                          <Keyboard className="h-2 w-2 mr-1" />
-                          {spot.hotkey}
-                        </Badge>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">{spot.reward} α</div>
-                        <div className="text-muted-foreground">cap: {spot.rewardCap} α</div>
-                      </div>
-                    </div>
-                  ))}
-                  {bounty.winningSpotConfigs.length > 3 && (
-                    <div className="text-xs text-muted-foreground text-center">
-                      +{bounty.winningSpotConfigs.length - 3} more spots
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              /* Fallback to legacy reward display */
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Coins className="h-4 w-4 text-yellow-500" />
-                  <div>
-                    <div className="font-medium">{bounty.alphaReward} α</div>
-                    <div className="text-xs text-muted-foreground">Current</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-orange-500" />
-                  <div>
-                    <div className="font-medium">{bounty.alphaRewardCap} α</div>
-                    <div className="text-xs text-muted-foreground">Cap</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Distribution and Summary */}
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-1">
-                <Trophy className="h-4 w-4 text-purple-500" />
-                <span className="text-xs">{getRewardDistributionText(bounty.rewardDistribution)}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4 text-blue-500" />
-                <span className="text-xs">
-                  {bounty.winningSpotConfigs?.length || bounty.winningSpots} {(bounty.winningSpotConfigs?.length || bounty.winningSpots) === 1 ? 'winner' : 'winners'}
-                </span>
-              </div>
-            </div>
-
-            {/* Deadline and Submissions */}
-            <div className="flex items-center justify-between text-sm">
-              {bounty.deadline ? (
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span className="text-xs">
-                    {new Date(bounty.deadline).toLocaleDateString()}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  <span className="text-xs">No deadline</span>
-                </div>
-              )}
-              
-              <span className="text-xs font-medium">
-                {bounty.submissionCount} submissions
-              </span>
-            </div>
-
-            {/* Creator */}
-            <div className="pt-2 border-t border-muted/30">
-              <div className="text-xs text-muted-foreground">
-                by @{bounty.creator.username || bounty.creator.walletAddress?.slice(0, 8) || 'Unknown'}
-              </div>
-            </div>
-
-            {/* Action Button */}
-            <Link href={`/bounties/${bounty.id}`} className="block w-full">
-              <Button 
-                className="w-full mt-3 bg-primary hover:bg-primary/90 transition-colors"
-                size="sm"
+      <Link href={`/bounties/${bounty.id}`} className="block h-full">
+        <Card className="h-full relative overflow-hidden border border-primary/30 hover:border-primary/50 bg-card/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group-hover:shadow-primary/20">
+          {/* Background Effects */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/8 to-purple/8 opacity-50 group-hover:opacity-100 transition-all duration-500" />
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-accent/20 to-purple/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+          {/* Header Section */}
+          <CardHeader className="pb-4 relative z-10">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center gap-2"
               >
-                View Details
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+                <Badge 
+                  className={`${getStatusColor(bounty.status)} shadow-sm px-3 py-1 rounded-lg font-medium`}
+                >
+                  {bounty.status}
+                </Badge>
+              </motion.div>
+              <div className="flex gap-2 flex-wrap">
+                {bounty.categories?.slice(0, 2)?.map((category) => (
+                  <Badge 
+                    key={category.name} 
+                    variant="outline" 
+                    className="text-xs glass-effect border-primary/30 hover:border-primary/50 transition-all duration-300"
+                    style={{ borderColor: category.color || undefined }}
+                  >
+                    {category.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            
+            <CardTitle className="text-xl font-bold leading-tight line-clamp-2 mb-3">
+              <span className="text-gradient bg-gradient-to-r from-primary via-accent to-purple bg-clip-text text-transparent group-hover:from-accent group-hover:to-purple transition-all duration-300">
+                {bounty.title}
+              </span>
+            </CardTitle>
+            
+            <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+              {bounty.description}
+            </p>
+          </CardHeader>
+
+          <CardContent className="pt-0 relative z-10">
+            <div className="space-y-4">
+              {/* Enhanced Reward Display */}
+              <div className="p-4 glass-effect border border-primary/20 rounded-xl bg-primary/5">
+                {bounty.winningSpotConfigs && bounty.winningSpotConfigs.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-bold text-gradient bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                      <Trophy className="h-4 w-4 text-primary" />
+                      <span>Winning Positions</span>
+                    </div>
+                    <div className="space-y-2">
+                      {bounty.winningSpotConfigs.slice(0, 2).map((spot) => (
+                        <motion.div 
+                          key={spot.id} 
+                          whileHover={{ scale: 1.02 }}
+                          className="flex items-center justify-between p-2 glass-effect border border-accent/20 rounded-lg bg-accent/5"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getPositionColor(spot.position)} bg-gradient-to-r from-primary/20 to-accent/20`}>
+                              {spot.position}
+                            </div>
+                            <span className="font-medium text-sm">{getPositionLabel(spot.position)}</span>
+                            <Badge variant="outline" className="text-xs px-2 py-0.5 glass-effect border-primary/30">
+                              <Key className="h-2 w-2 mr-1" />
+                              {spot.hotkey.slice(0, 6)}...
+                            </Badge>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-sm text-gradient">{spot.reward} α</div>
+                          </div>
+                        </motion.div>
+                      ))}
+                      {bounty.winningSpotConfigs.length > 2 && (
+                        <div className="text-xs text-center text-muted-foreground font-medium">
+                          +{bounty.winningSpotConfigs.length - 2} more positions
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-bold text-gradient bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                      <Coins className="h-4 w-4 text-primary" />
+                      <span>Alpha Rewards</span>
+                    </div>
+                    <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-2 p-3 glass-effect border border-primary/20 rounded-lg">
+                      <Coins className="h-5 w-5 text-yellow-500" />
+                      <div>
+                        <div className="font-bold text-lg">{bounty.alphaReward} α</div>
+                        <div className="text-xs text-muted-foreground">Alpha Reward</div>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+              </div>
+
+              {/* Enhanced Stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <motion.div
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  className="flex items-center gap-2 p-3 glass-effect border border-primary/30 rounded-xl hover:border-primary/50 transition-all duration-300"
+                >
+                  <Users className="h-4 w-4 text-primary" />
+                  <div>
+                    <div className="text-sm font-bold text-gradient">{bounty.submissionCount}</div>
+                    <div className="text-xs text-muted-foreground">Submissions</div>
+                  </div>
+                </motion.div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  className="flex items-center gap-2 p-3 glass-effect border border-accent/30 rounded-xl hover:border-accent/50 transition-all duration-300"
+                >
+                  <Trophy className="h-4 w-4 text-accent" />
+                  <div>
+                    <div className="text-sm font-bold text-gradient">{bounty.winningSpotConfigs?.length || bounty.winningSpots}</div>
+                    <div className="text-xs text-muted-foreground">Winners</div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Timeline Info */}
+              <div className="flex items-center justify-between">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="flex items-center gap-2 px-3 py-2 glass-effect border border-purple/30 rounded-full"
+                >
+                  {bounty.deadline ? (
+                    <>
+                      <Clock className="h-3 w-3 text-purple-400" />
+                      <span className="text-xs font-medium text-gradient">
+                        {new Date(bounty.deadline).toLocaleDateString()}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Calendar className="h-3 w-3 text-purple-400" />
+                      <span className="text-xs font-medium text-gradient">No deadline</span>
+                    </>
+                  )}
+                </motion.div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="flex items-center gap-2 px-3 py-2 glass-effect border border-primary/30 rounded-full"
+                >
+                  <User className="h-3 w-3 text-primary" />
+                  <span className="text-xs font-medium text-gradient">
+                    @{bounty.creator.username || bounty.creator.walletAddress?.slice(0, 8) || 'Unknown'}
+                  </span>
+                </motion.div>
+              </div>
+
+              {/* Enhanced Action Button */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="mt-4"
+              >
+                <div className="w-full bg-gradient-to-r from-primary via-blue-600 to-accent hover:from-primary/90 hover:via-blue-700 hover:to-accent/90 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-primary/20 flex items-center justify-center gap-2 group-hover:shadow-xl">
+                  <span>Explore Bounty</span>
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
+                </div>
+              </motion.div>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
     </motion.div>
   )
 }

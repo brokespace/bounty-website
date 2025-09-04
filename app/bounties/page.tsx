@@ -110,50 +110,20 @@ export default async function BountiesPage() {
       <Navigation />
       
       <main className="container mx-auto max-w-7xl px-4 py-8">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">
-              Bounty <span className="text-primary">Marketplace</span>
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Discover active bounties and earn alpha rewards for your skills
-            </p>
-          </div>
-          
-          {session?.user?.isAdmin && (
+        {/* Admin Create Button */}
+        {session?.user?.isAdmin && (
+          <div className="flex justify-end mb-8">
             <Link href="/create">
               <Button size="lg" className="bg-primary hover:bg-primary/90">
                 <Plus className="mr-2 h-5 w-5" />
                 Create Bounty
               </Button>
             </Link>
-          )}
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {statsCards.map((stat, index) => (
-            <AnimatedSection key={index} delay={index * 0.1} duration={0.6}>
-              <Card className="border-muted/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-2xl font-bold">{stat.value}</p>
-                      <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    </div>
-                    <div className={`${stat.color}`}>
-                      {stat.icon}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </AnimatedSection>
-          ))}
-        </div>
+          </div>
+        )}
 
         {/* Bounties List */}
-        <BountiesClient initialBounties={initialBounties} />
+        <BountiesClient initialBounties={initialBounties} totalRewards={stats.totalRewards} />
       </main>
     </div>
   )
