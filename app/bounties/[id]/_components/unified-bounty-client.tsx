@@ -331,7 +331,7 @@ export function UnifiedBountyClient({
 
                   {/* Screening Information */}
                   {submission.scoringJobs?.length > 0 && (
-                    <div className="mb-4">
+                    <div className="">
                       <div className="flex flex-wrap gap-2">
                         {submission.scoringJobs.map((job: any) => (
                           <motion.div
@@ -385,7 +385,7 @@ export function UnifiedBountyClient({
                     } shadow-lg`} />
 
                   {/* Enhanced Vote Buttons */}
-                  {isAuthenticated && user?.id !== submission.submitterId && !(isOwner || isAdmin) && (
+                  {/* {isAuthenticated && user?.id !== submission.submitterId && !(isOwner || isAdmin) && (
                     <div className="flex flex-col gap-2">
                       <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                         <Button
@@ -408,16 +408,28 @@ export function UnifiedBountyClient({
                         </Button>
                       </motion.div>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
 
             {/* Content Section */}
-            <div className="p-4 sm:p-6 pt-4">
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                {shouldAnonymize ? 'Submission content hidden for privacy' : submission.description}
-              </p>
+            <div className="pl-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-6"
+            >
+              <h3 className="text-lg font-semibold mb-3 text-gradient bg-gradient-to-r from-primary via-accent to-purple bg-clip-text text-transparent">
+                Description
+              </h3>
+              <div className="pl-4 border-l-2 border-primary/30">
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  {shouldAnonymize ? 'Submission content hidden for privacy' : submission.description}
+                </p>
+              </div>
+            </motion.div>
 
               {/* Enhanced User Information */}
               <div className="flex flex-wrap items-center gap-3 mb-4">
