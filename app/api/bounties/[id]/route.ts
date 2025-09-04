@@ -12,6 +12,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    
     const bounty = await prisma.bounty.findUnique({
       where: { id: params.id },
       include: {
@@ -68,15 +70,30 @@ export async function GET(
         reward: spot.reward.toString(),
         rewardCap: spot.rewardCap.toString()
       })),
-      submissions: bounty.submissions.map(submission => ({
-        ...submission,
-        score: submission.score?.toString() || null,
-        voteCount: submission._count.votes,
-        files: submission.files.map(file => ({
-          ...file,
-          filesize: file.filesize.toString()
-        }))
-      }))
+      submissions: bounty.submissions.map(submission => {
+        // Determine if user should see sensitive data
+        const isOwner = session?.user?.id === submission.submitterId
+        const isBountyCreator = session?.user?.id === bounty.creatorId
+        const isAdmin = session?.user?.isAdmin === true
+        const isBountyCompleted = bounty.status === 'COMPLETED'
+        const canViewSensitiveData = isOwner || isBountyCreator || isAdmin || isBountyCompleted
+
+        return {
+          ...submission,
+          // Filter sensitive data for unauthorized users (unless bounty is completed)
+          description: canViewSensitiveData ? submission.description : 'Submission content hidden for privacy',
+          textContent: canViewSensitiveData ? submission.textContent : null,
+          urls: canViewSensitiveData ? submission.urls : [],
+          score: submission.score?.toString() || null,
+          voteCount: submission._count.votes,
+          files: submission.files.map(file => ({
+            ...file,
+            filesize: file.filesize.toString()
+          })),
+          // Add flag to help UI determine anonymization
+          isAnonymized: !canViewSensitiveData
+        }
+      })
     }
 
     return NextResponse.json(formattedBounty)

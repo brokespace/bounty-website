@@ -12,6 +12,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    
     const submission = await prisma.submission.findUnique({
       where: { id: params.id },
       include: {
@@ -26,6 +28,8 @@ export async function GET(
           select: {
             id: true,
             title: true,
+            creatorId: true,
+            status: true,
             alphaReward: true,
             alphaRewardCap: true,
             rewardDistribution: true
@@ -57,8 +61,19 @@ export async function GET(
       )
     }
 
+    // Determine if user should see sensitive data
+    const isOwner = session?.user?.id === submission.submitterId
+    const isBountyCreator = session?.user?.id === submission.bounty.creatorId
+    const isAdmin = session?.user?.isAdmin === true
+    const isBountyCompleted = submission.bounty.status === 'COMPLETED'
+    const canViewSensitiveData = isOwner || isBountyCreator || isAdmin || isBountyCompleted
+
     const formattedSubmission = {
       ...submission,
+      // Filter sensitive data for unauthorized users
+      description: canViewSensitiveData ? submission.description : 'Submission content hidden for privacy',
+      textContent: canViewSensitiveData ? submission.textContent : null,
+      urls: canViewSensitiveData ? submission.urls : [],
       score: submission.score?.toString() || null,
       bounty: {
         ...submission.bounty,
@@ -72,7 +87,9 @@ export async function GET(
       validationLogs: submission.validationLogs.map(log => ({
         ...log,
         score: log.score?.toString() || null
-      }))
+      })),
+      // Add flag to help UI determine anonymization
+      isAnonymized: !canViewSensitiveData
     }
 
     return NextResponse.json({ submission: formattedSubmission })

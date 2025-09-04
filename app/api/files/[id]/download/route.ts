@@ -46,10 +46,13 @@ export async function GET(
     // User can access if they:
     // 1. Own the submission
     // 2. Own the bounty
-    // 3. Are an admin (you can add admin check here)
+    // 3. Are an admin
+    // 4. Bounty is completed (public access)
     const canAccess = 
       file.submission.submitterId === session.user.id ||
-      file.submission.bounty.creatorId === session.user.id
+      file.submission.bounty.creatorId === session.user.id ||
+      session.user.isAdmin === true ||
+      file.submission.bounty.status === 'COMPLETED'
 
     if (!canAccess) {
       return NextResponse.json(

@@ -274,8 +274,10 @@ export function UnifiedBountyClient({
   }
 
   const renderSubmission = (submission: any, isUserSubmission: boolean = false) => {
-    // Determine if submission should be anonymized (only for non-owners/non-admins)
-    const shouldAnonymize = !isUserSubmission && user?.id !== submission.submitterId && !(isOwner || isAdmin)
+    // Use server-provided anonymization flag, fallback to client-side logic for compatibility
+    const shouldAnonymize = submission.isAnonymized !== undefined 
+      ? submission.isAnonymized 
+      : (!isUserSubmission && user?.id !== submission.submitterId && !(isOwner || isAdmin))
 
     return (
       <motion.div
@@ -285,7 +287,7 @@ export function UnifiedBountyClient({
         whileHover={{ y: -8, scale: 1.02 }}
         className="group"
       >
-        <Card className="relative overflow-hidden border border-gray-200 hover:border-gray-300 bg-white w-full min-w-0 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+        <Card className="relative overflow-hidden border border-gray-200 hover:border-gray-300  w-full min-w-0 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/8 to-purple/8 opacity-0 group-hover:opacity-100 transition-all duration-500" />
           <div className="absolute -top-40 -right-40 w-40 h-40 bg-gradient-to-br from-accent/20 to-purple/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
           <CardContent className="p-0 relative z-10">
@@ -426,7 +428,7 @@ export function UnifiedBountyClient({
                   <User className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium text-gradient">
                     {shouldAnonymize
-                      ? '🕵️ Anonymous Hunter'
+                      ? '🕵️ Anonymous'
                       : `@${submission.submitter?.username || submission.submitter?.walletAddress?.slice(0, 8) || 'Unknown'}`
                     }
                   </span>
@@ -436,7 +438,7 @@ export function UnifiedBountyClient({
                   className="flex items-center gap-2 px-4 py-2 glass-effect border border-accent/30 rounded-full hover:border-accent/50 transition-all duration-300"
                 >
                   <Calendar className="h-4 w-4 text-accent" />
-                  <span className="text-sm font-medium text-gradient">Hunted {submission.createdAt?.split('T')[0] || 'Unknown date'}</span>
+                  <span className="text-sm font-medium text-gradient">Submitted {submission.createdAt?.split('T')[0] || 'Unknown date'}</span>
                 </motion.div>
                 {submission.contentType && (
                   <motion.div
@@ -1249,7 +1251,7 @@ export function UnifiedBountyClient({
                               <Clock className="h-5 w-5 text-white" />
                             </motion.div>
                             <div>
-                              <p className="text-sm font-bold text-purple-400">Hunt Deadline</p>
+                              <p className="text-sm font-bold text-purple-400">Deadline</p>
                               <p className="text-sm text-gradient font-medium">
                                 {new Date(currentBounty.deadline).toLocaleDateString()}
                               </p>
@@ -1424,7 +1426,9 @@ export function UnifiedBountyClient({
                       ?.sort((a: any, b: any) => parseFloat(b.score || '0') - parseFloat(a.score || '0'))
                       ?.map((submission: any, index: number) => {
                         const isUserSubmission = user?.id === submission.submitterId
-                        const shouldAnonymize = !isUserSubmission && !(isOwner || isAdmin)
+                        const shouldAnonymize = submission.isAnonymized !== undefined 
+                          ? submission.isAnonymized 
+                          : (!isUserSubmission && !(isOwner || isAdmin))
 
                         return (
                           <motion.div
