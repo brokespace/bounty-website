@@ -26,7 +26,7 @@ export function BountiesClient({ initialBounties, totalRewards }: BountiesClient
   const [bounties, setBounties] = useState(initialBounties)
   const [filteredBounties, setFilteredBounties] = useState(initialBounties)
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('active')
   const [sortBy, setSortBy] = useState('createdAt')
   const [isLoading, setIsLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)

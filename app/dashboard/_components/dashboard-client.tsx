@@ -582,12 +582,12 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
             </Link>
           </motion.div>
 
-          {data?.suggestedBounties?.length === 0 ? (
+          {!data?.suggestedBounties || data.suggestedBounties.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="card-enhanced relative border border-yellow-500/30 bg-card rounded-xl"
+              className="card-enhanced relative border border-yellow-500/30 bg-card rounded-xl overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/8 via-orange/8 to-primary/8 animate-gradient-shift" />
               <div className="text-center py-16 px-6 relative z-10">
