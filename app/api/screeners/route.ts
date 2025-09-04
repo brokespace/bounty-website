@@ -7,12 +7,34 @@ const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.isAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const screeners = await prisma.screener.findMany({
+      include: {
+        supportedBounties: {
+          include: {
+            bounty: {
+              select: {
+                id: true,
+                title: true,
+                status: true
+              }
+            },
+            category: {
+              include: {
+                bounties: {
+                  where: {
+                    status: 'ACTIVE'
+                  },
+                  select: {
+                    id: true,
+                    title: true,
+                    status: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       orderBy: [
         { priority: 'desc' },
         { name: 'asc' }

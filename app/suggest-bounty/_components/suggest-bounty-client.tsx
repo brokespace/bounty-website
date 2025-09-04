@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ArrowLeft, Lightbulb, Trophy, Target, Users, Clock, Coins, Link2, FileText, Upload, Info } from 'lucide-react'
+import { ArrowLeft, Lightbulb, Trophy, Target, Users, Clock, Coins, Link2, FileText, Upload, Info, Plus, X, Medal } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -20,12 +20,25 @@ interface SuggestBountyClientProps {
   user: any
 }
 
+const getPositionLabel = (position: number) => {
+  const suffixes = ['st', 'nd', 'rd']
+  const remainder = position % 10
+  const hundredRemainder = position % 100
+  
+  if (hundredRemainder >= 11 && hundredRemainder <= 13) {
+    return `${position}th`
+  }
+  
+  return `${position}${suffixes[remainder - 1] || 'th'}`
+}
+
 export function SuggestBountyClient({ user }: SuggestBountyClientProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
+    problem: '',
+    info: '',
     requirements: '',
     alphaReward: '',
     alphaRewardCap: '',
@@ -33,7 +46,8 @@ export function SuggestBountyClient({ user }: SuggestBountyClientProps) {
     winningSpots: '1',
     deadline: '',
     hasDeadline: false,
-    acceptedSubmissionTypes: ['FILE'] as string[]
+    acceptedSubmissionTypes: ['FILE'] as string[],
+    winningSpotConfigs: [{ position: 1, reward: '', rewardCap: '', hotkey: '1' }]
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,18 +56,8 @@ export function SuggestBountyClient({ user }: SuggestBountyClientProps) {
 
     try {
       // Validation
-      if (!formData.title || !formData.description || !formData.requirements) {
+      if (!formData.title || !formData.problem || !formData.info || !formData.requirements) {
         toast.error('Please fill in all required fields')
-        return
-      }
-
-      if (parseFloat(formData.alphaReward) <= 0 || parseFloat(formData.alphaRewardCap) <= 0) {
-        toast.error('Reward amounts must be greater than 0')
-        return
-      }
-
-      if (parseFloat(formData.alphaReward) > parseFloat(formData.alphaRewardCap)) {
-        toast.error('Current reward cannot exceed reward cap')
         return
       }
 
@@ -62,15 +66,51 @@ export function SuggestBountyClient({ user }: SuggestBountyClientProps) {
         return
       }
 
+      // Validate winning spots configuration
+      if (formData.winningSpotConfigs.length === 0) {
+        toast.error('Must configure at least one winning spot')
+        return
+      }
+
+      for (const spot of formData.winningSpotConfigs) {
+        if (!spot.reward || !spot.rewardCap || !spot.hotkey) {
+          toast.error(`Winning spot ${spot.position} is missing required fields`)
+          return
+        }
+        if (parseFloat(spot.reward) <= 0 || parseFloat(spot.rewardCap) <= 0) {
+          toast.error(`Winning spot ${spot.position} reward amounts must be greater than 0`)
+          return
+        }
+        if (parseFloat(spot.reward) > parseFloat(spot.rewardCap)) {
+          toast.error(`Winning spot ${spot.position} reward cannot exceed cap`)
+          return
+        }
+      }
+
+      // Check for duplicate hotkeys
+      const hotkeys = formData.winningSpotConfigs.map(s => s.hotkey)
+      const duplicateHotkeys = hotkeys.filter((key, index) => hotkeys.indexOf(key) !== index)
+      if (duplicateHotkeys.length > 0) {
+        toast.error('Winning spots cannot have duplicate hotkeys')
+        return
+      }
+
       if (formData.acceptedSubmissionTypes.length === 0) {
         toast.error('Must select at least one submission type')
         return
       }
 
+      // Calculate legacy values from winning spots for backward compatibility
+      const totalReward = formData.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.reward || '0'), 0)
+      const totalRewardCap = formData.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.rewardCap || '0'), 0)
+
       const submitData = {
         ...formData,
+        alphaReward: totalReward.toString(),
+        alphaRewardCap: totalRewardCap.toString(),
         deadline: formData.hasDeadline && formData.deadline ? formData.deadline : null,
-        winningSpots: parseInt(formData.winningSpots)
+        winningSpots: formData.winningSpotConfigs.length,
+        winningSpotConfigs: formData.winningSpotConfigs
       }
 
       const response = await fetch('/api/suggested-bounties', {
@@ -107,6 +147,52 @@ export function SuggestBountyClient({ user }: SuggestBountyClientProps) {
       acceptedSubmissionTypes: checked
         ? [...prev.acceptedSubmissionTypes, type]
         : prev.acceptedSubmissionTypes.filter(t => t !== type)
+    }))
+  }
+
+  const updateWinningSpots = (count: number) => {
+    const newSpots = Array.from({ length: count }, (_, i) => {
+      const existing = formData.winningSpotConfigs[i]
+      return existing || {
+        position: i + 1,
+        reward: '',
+        rewardCap: '',
+        hotkey: (i + 1).toString()
+      }
+    })
+    setFormData(prev => ({ ...prev, winningSpotConfigs: newSpots }))
+  }
+
+  const updateWinningSpot = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      winningSpotConfigs: prev.winningSpotConfigs.map((spot, i) => 
+        i === index ? { ...spot, [field]: value } : spot
+      )
+    }))
+  }
+
+  const removeWinningSpot = (index: number) => {
+    if (formData.winningSpotConfigs.length <= 1) return
+    setFormData(prev => ({
+      ...prev,
+      winningSpotConfigs: prev.winningSpotConfigs.filter((_, i) => i !== index)
+        .map((spot, i) => ({ ...spot, position: i + 1 })),
+      winningSpots: (prev.winningSpotConfigs.length - 1).toString()
+    }))
+  }
+
+  const addWinningSpot = () => {
+    const newPosition = formData.winningSpotConfigs.length + 1
+    setFormData(prev => ({
+      ...prev,
+      winningSpotConfigs: [...prev.winningSpotConfigs, {
+        position: newPosition,
+        reward: '',
+        rewardCap: '',
+        hotkey: newPosition.toString()
+      }],
+      winningSpots: newPosition.toString()
     }))
   }
 
@@ -172,15 +258,29 @@ export function SuggestBountyClient({ user }: SuggestBountyClientProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">
-                  Description <span className="text-red-500">*</span>
+                <Label htmlFor="problem">
+                  Problem Description <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
-                  id="description"
-                  placeholder="Provide a detailed description of what you'd like to see built or accomplished..."
+                  id="problem"
+                  placeholder="Provide a short description of the problem you want solved..."
+                  rows={3}
+                  value={formData.problem}
+                  onChange={(e) => handleInputChange('problem', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="info">
+                  Technical Information <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="info"
+                  placeholder="Technical details of how submissions will be graded, required file formats, evaluation criteria, etc..."
                   rows={4}
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  value={formData.info}
+                  onChange={(e) => handleInputChange('info', e.target.value)}
                   required
                 />
               </div>
@@ -191,7 +291,7 @@ export function SuggestBountyClient({ user }: SuggestBountyClientProps) {
                 </Label>
                 <Textarea
                   id="requirements"
-                  placeholder="Specify the technical requirements, skills needed, deliverables, success criteria, etc..."
+                  placeholder="Specify the technical requirements, skills needed, deliverables, etc..."
                   rows={4}
                   value={formData.requirements}
                   onChange={(e) => handleInputChange('requirements', e.target.value)}
@@ -200,81 +300,119 @@ export function SuggestBountyClient({ user }: SuggestBountyClientProps) {
               </div>
             </div>
 
-            {/* Reward Configuration */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="alphaReward" className="flex items-center gap-2">
-                  <Coins className="h-4 w-4 text-yellow-500" />
-                  Suggested Reward (α) <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="alphaReward"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="100.00"
-                  value={formData.alphaReward}
-                  onChange={(e) => handleInputChange('alphaReward', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="alphaRewardCap" className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-orange-500" />
-                  Reward Cap (α) <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="alphaRewardCap"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="500.00"
-                  value={formData.alphaRewardCap}
-                  onChange={(e) => handleInputChange('alphaRewardCap', e.target.value)}
-                  required
-                />
-              </div>
+            {/* Reward Distribution */}
+            <div className="space-y-2">
+              <Label htmlFor="rewardDistribution">Reward Distribution</Label>
+              <Select
+                value={formData.rewardDistribution}
+                onValueChange={(value) => handleInputChange('rewardDistribution', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL_AT_ONCE">60% All at Once</SelectItem>
+                  <SelectItem value="OVER_TIME">100% Over Time</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {formData.rewardDistribution === 'ALL_AT_ONCE' 
+                  ? 'Winners get 60% of reward immediately' 
+                  : 'Winners get 100% of reward distributed over time'}
+              </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="rewardDistribution">Reward Distribution</Label>
-                <Select
-                  value={formData.rewardDistribution}
-                  onValueChange={(value) => handleInputChange('rewardDistribution', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL_AT_ONCE">60% All at Once</SelectItem>
-                    <SelectItem value="OVER_TIME">100% Over Time</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  {formData.rewardDistribution === 'ALL_AT_ONCE' 
-                    ? 'Winners get 60% of reward immediately' 
-                    : 'Winners get 100% of reward distributed over time'}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="winningSpots" className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-blue-500" />
-                  Winning Spots
+            {/* Winning Spots Configuration */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-medium flex items-center gap-2">
+                  <Medal className="h-5 w-5 text-primary" />
+                  Winning Spots Configuration <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="winningSpots"
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={formData.winningSpots}
-                  onChange={(e) => handleInputChange('winningSpots', e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Number of winners who should receive rewards
-                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addWinningSpot}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Spot
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Configure individual rewards, caps, and hotkeys for each winning position
+              </p>
+              
+              <div className="space-y-3">
+                {formData.winningSpotConfigs.map((spot, index) => (
+                  <div key={index} className="border border-muted/30 rounded-lg p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-yellow-500" />
+                        {getPositionLabel(spot.position)} Place
+                      </h4>
+                      {formData.winningSpotConfigs.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeWinningSpot(index)}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Coins className="h-4 w-4 text-yellow-500" />
+                          Current Reward (α)
+                        </Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="100.00"
+                          value={spot.reward}
+                          onChange={(e) => updateWinningSpot(index, 'reward', e.target.value)}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Target className="h-4 w-4 text-orange-500" />
+                          Reward Cap (α)
+                        </Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="500.00"
+                          value={spot.rewardCap}
+                          onChange={(e) => updateWinningSpot(index, 'rewardCap', e.target.value)}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Trophy className="h-4 w-4 text-purple-500" />
+                          Hotkey
+                        </Label>
+                        <Input
+                          placeholder="1"
+                          value={spot.hotkey}
+                          onChange={(e) => updateWinningSpot(index, 'hotkey', e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 

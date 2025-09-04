@@ -78,7 +78,7 @@ export function HomePageClient() {
     {
       icon: <Target className="h-8 w-8" />,
       title: "Multiple Winners",
-      description: "Bounties can have multiple winning spots, giving more hunters a chance to earn rewards."
+      description: "Bounties can have multiple winning spots, giving more users a chance to earn rewards."
     },
     {
       icon: <Shield className="h-8 w-8" />,
@@ -100,7 +100,7 @@ export function HomePageClient() {
   const statsData = [
     { label: "Active Bounties", value: stats.activeBounties, icon: <Trophy className="h-5 w-5" /> },
     { label: "Total Rewards", value: stats.totalRewards, icon: <Coins className="h-5 w-5" /> },
-    { label: "Hunters", value: stats.totalUsers, icon: <Users className="h-5 w-5" /> },
+    { label: "Users", value: stats.totalUsers, icon: <Users className="h-5 w-5" /> },
     { label: "Success Rate", value: stats.successRate, icon: <Target className="h-5 w-5" /> }
   ]
 
@@ -194,7 +194,7 @@ export function HomePageClient() {
             {' '}Work
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Our revolutionary bounty system transforms how creators post challenges and hunters earn rewards in the crypto space.
+            Our revolutionary bounty system transforms how creators post challenges and users earn rewards in the crypto space.
           </p>
         </motion.div>
 
@@ -210,7 +210,7 @@ export function HomePageClient() {
             {
               step: "02", 
               title: "Hunt & Submit",
-              description: "Bounty hunters browse active challenges, claim tasks, and submit their work with file uploads, code, or documentation.",
+              description: "Bounty users browse active challenges, claim tasks, and submit their work with file uploads, code, or documentation.",
               icon: "🎯",
               gradient: "from-accent to-orange-500"
             },
@@ -408,7 +408,7 @@ export function HomePageClient() {
             ?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Discover how our bounty system revolutionizes crypto rewards with cutting-edge features designed for hunters and creators alike.
+            Discover how our bounty system revolutionizes crypto rewards with cutting-edge features designed for users and creators alike.
           </p>
         </motion.div>
         
@@ -479,7 +479,7 @@ export function HomePageClient() {
                   ?
                 </h2>
                 <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
-                  Join thousands of bounty hunters earning{' '}
+                  Join thousands of bounty users earning{' '}
                   <span className="text-accent font-semibold">alpha rewards</span>. 
                   Create your account with just your wallet address.
                 </p>

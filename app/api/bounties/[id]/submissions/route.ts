@@ -237,7 +237,8 @@ export async function POST(
     // Only trigger immediately if no files are expected
     if (screenerSupport?.screener && !expectsFiles) {
       try {
-        const processUrl = `${screenerSupport.screener.apiUrl}/process-submission/${submission.id}`
+        const watcherUrl = process.env.WATCHER_URL
+        const processUrl = `${watcherUrl}/process-submission/${submission.id}`
         await fetch(processUrl, {
           method: 'POST',
           headers: {

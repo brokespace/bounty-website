@@ -109,15 +109,17 @@ model Submission {
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   validatedAt    DateTime?
-  bountyId       String
+  bountyId       String?
   submitterId    String
+  suggestedBountyId String?
   contentType    SubmissionContentType @default(FILE)
   textContent    String?
   urls           String[]              @default([])
   tosAccepted    Boolean               @default(false)
   tosAcceptedAt  DateTime?
   files          SubmissionFile[]
-  bounty         Bounty                @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  bounty         Bounty?               @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  suggestedBounty SuggestedBounty?     @relation(fields: [suggestedBountyId], references: [id], onDelete: Cascade)
   submitter      User                  @relation(fields: [submitterId], references: [id])
   validationLogs ValidationLog[]
   votes          Vote[]
@@ -171,26 +173,26 @@ model ValidationLog {
 }
 
 model SuggestedBounty {
-  id                      String                  @id @default(cuid())
+   id                      String                  @id @default(cuid())
   title                   String
-  description             String
-  requirements            String
-  alphaReward             Decimal                 @db.Decimal(18, 8)
-  alphaRewardCap          Decimal                 @db.Decimal(18, 8)
+  problem                 String                  // Short description of the problem
+  info                    String                  // Technical details of how a submission is graded, file formats, etc
+  requirements            String                  // Requirements for bounty completion
   rewardDistribution      RewardDistribution      @default(ALL_AT_ONCE)
   winningSpots            Int                     @default(1)
-  acceptedSubmissionTypes SubmissionContentType[] @default([FILE])
-  status                  SuggestedBountyStatus   @default(PENDING)
+  status                  BountyStatus            @default(DRAFT)
   createdAt               DateTime                @default(now())
   updatedAt               DateTime                @updatedAt
   deadline                DateTime?
-  reviewedAt              DateTime?
-  reviewNotes             String?
-  convertedBountyId       String?                 @unique
-  suggestedById           String
-  convertedBounty         Bounty?                 @relation(fields: [convertedBountyId], references: [id])
-  suggestedBy             User                    @relation(fields: [suggestedById], references: [id])
+  creatorId               String
+  acceptedSubmissionTypes SubmissionContentType[] @default([FILE])
+  creator                 User                    @relation(fields: [creatorId], references: [id])
+  bounty                  Bounty?                 @relation(fields: [bountyId], references: [id])
+  bountyId                String?                 @unique
+  submissions             Submission[]
   categories              BountyCategory[]        @relation("BountyCategoryToSuggestedBounty")
+  screenerSupports        ScreenerBountySupport[]
+  winningSpotConfigs      WinningSpot[]
 
   @@map("suggested_bounties")
 }
@@ -279,6 +281,10 @@ model Screener {
   priority    Int               @default(0) // Higher priority screeners are preferred
   maxConcurrent Int             @default(5) // Max concurrent scoring jobs
   currentJobs Int               @default(0) // Current active scoring jobs
+  lastHeartbeat DateTime?       // Last heartbeat timestamp from screener
+  heartbeatFailures Int         @default(0) // Consecutive heartbeat failures
+  reportedRunningJobs String[]  @default([]) // Job IDs reported as running by screener
+  lastJobReport DateTime?       // Last time screener reported job status
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   
@@ -293,13 +299,16 @@ model ScreenerBountySupport {
   id                String                  @id @default(cuid())
   screenerId        String
   bountyId          String?                 // Specific bounty support (optional)
+  suggestedBountyId String?                 // Suggested bounty support (optional)
   categoryId        String?                 // Category-based support (optional)
   submissionTypes   SubmissionContentType[] // Supported submission types
   screener          Screener                @relation(fields: [screenerId], references: [id], onDelete: Cascade)
   bounty            Bounty?                 @relation(fields: [bountyId], references: [id])
+  suggestedBounty   SuggestedBounty?        @relation(fields: [suggestedBountyId], references: [id])
   category          BountyCategory?         @relation(fields: [categoryId], references: [id])
   
   @@unique([screenerId, bountyId])
+  @@unique([screenerId, suggestedBountyId])
   @@unique([screenerId, categoryId])
   @@map("screener_bounty_support")
 }
@@ -315,6 +324,7 @@ model ScoringJob {
   errorMessage  String?
   retryCount    Int                 @default(0)
   maxRetries    Int                 @default(3)
+  nextRetryAt   DateTime?           // When this job can be retried next
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   
@@ -341,10 +351,14 @@ model WinningSpot {
   rewardCap     Decimal @db.Decimal(18, 8)
   hotkey        String  // e.g., "1", "2", "3" or "F1", "F2", etc.
   createdAt     DateTime @default(now())
-  bountyId      String
-  bounty        Bounty  @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  bountyId      String?
+  suggestedBountyId String?
+  bounty        Bounty?          @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  suggestedBounty SuggestedBounty? @relation(fields: [suggestedBountyId], references: [id], onDelete: Cascade)
   
   @@unique([bountyId, position])
   @@unique([bountyId, hotkey])
+  @@unique([suggestedBountyId, position])
+  @@unique([suggestedBountyId, hotkey])
   @@map("winning_spots")
 }

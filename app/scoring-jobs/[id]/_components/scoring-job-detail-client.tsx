@@ -280,7 +280,7 @@ export function ScoringJobDetailClient({
               <Label className="text-sm font-bold text-primary mb-2 block">Description</Label>
               <div className="p-3 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-lg">
                 <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                  {currentScoringJob.submission.problem}
+                  {currentScoringJob.submission.description}
                 </p>
               </div>
             </motion.div>
