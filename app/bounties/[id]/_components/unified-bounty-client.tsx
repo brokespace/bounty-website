@@ -287,7 +287,7 @@ export function UnifiedBountyClient({
         whileHover={{ y: -8, scale: 1.02 }}
         className="group"
       >
-        <Card className="relative overflow-hidden border border-gray-200 hover:border-gray-300  w-full min-w-0 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+        <Card className="relative overflow-hidden border border-accent/30 hover:border-accent/50 w-full min-w-0 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/8 to-purple/8 opacity-0 group-hover:opacity-100 transition-all duration-500" />
           <div className="absolute -top-40 -right-40 w-40 h-40 bg-gradient-to-br from-accent/20 to-purple/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
           <CardContent className="p-0 relative z-10">
