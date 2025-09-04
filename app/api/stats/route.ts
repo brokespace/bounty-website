@@ -15,11 +15,11 @@ export async function GET() {
       where: { status: 'COMPLETED' }
     })
 
-    // Get total rewards (sum of all alphaReward values)
-    const totalRewardsResult = await prisma.bounty.aggregate({
-      _sum: { alphaReward: true }
+    // Get total rewards (sum of all winning spot rewards)
+    const totalRewards = await prisma.winningSpot.aggregate({
+      _sum: { reward: true }
     })
-    const totalRewards = totalRewardsResult._sum.alphaReward || 0
+    const totalRewardsAmount = totalRewards._sum.reward || 0
 
     // Get user count
     const totalUsers = await prisma.user.count({
@@ -46,8 +46,8 @@ export async function GET() {
           successRate: parseFloat(successRate)
         },
         rewards: {
-          total: totalRewards.toString(),
-          totalNumeric: parseFloat(totalRewards.toString())
+          total: totalRewardsAmount.toString(),
+          totalNumeric: parseFloat(totalRewardsAmount.toString())
         },
         users: {
           total: totalUsers

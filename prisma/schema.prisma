@@ -70,8 +70,6 @@ model Bounty {
   problem                 String                  // Short description of the problem
   info                    String                  // Technical details of how a submission is graded, file formats, etc
   requirements            String                  // Requirements for bounty completion
-  alphaReward             Decimal                 @db.Decimal(18, 8)
-  alphaRewardCap          Decimal                 @db.Decimal(18, 8)
   rewardDistribution      RewardDistribution      @default(ALL_AT_ONCE)
   winningSpots            Int                     @default(1)
   status                  BountyStatus            @default(DRAFT)

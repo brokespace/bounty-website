@@ -100,14 +100,15 @@ async function main() {
   for (let i = 0; i < bountyTitles.length; i++) {
     const creator = i === 0 ? testUser : users[i % users.length]
     const randomCategory = categories[i % categories.length]
+    const alphaReward = parseFloat((Math.random() * 1000 + 100).toFixed(2))
+    const alphaRewardCap = parseFloat((Math.random() * 5000 + 1000).toFixed(2))
     
     const bounty = await prisma.bounty.create({
       data: {
         title: bountyTitles[i],
-        description: bountyDescriptions[i],
+        problem: bountyDescriptions[i], // Map description to problem
+        info: requirements[i], // Map requirements to info
         requirements: requirements[i],
-        alphaReward: parseFloat((Math.random() * 1000 + 100).toFixed(2)),
-        alphaRewardCap: parseFloat((Math.random() * 5000 + 1000).toFixed(2)),
         rewardDistribution: Math.random() > 0.5 ? 'ALL_AT_ONCE' : 'OVER_TIME',
         winningSpots: Math.floor(Math.random() * 3) + 1,
         status: (['ACTIVE', 'ACTIVE', 'ACTIVE', 'COMPLETED', 'PAUSED'] as const)[Math.floor(Math.random() * 5)],
@@ -115,6 +116,14 @@ async function main() {
         creatorId: creator.id,
         categories: {
           connect: { name: randomCategory.name }
+        },
+        winningSpotConfigs: {
+          create: [{
+            position: 1,
+            reward: alphaReward,
+            rewardCap: alphaRewardCap,
+            hotkey: "1"
+          }]
         }
       }
     })

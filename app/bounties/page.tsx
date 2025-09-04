@@ -25,14 +25,23 @@ async function getBountyStats() {
       }
     })
 
-    // Get total rewards (sum of all alphaReward values)
-    const totalRewardsResult = await prisma.bounty.aggregate({
-      _sum: {
-        alphaReward: true
+    // Get total rewards (sum of all winningSpotConfigs reward values)
+    const bountiesWithConfigs = await prisma.bounty.findMany({
+      include: {
+        winningSpotConfigs: {
+          orderBy: {
+            position: 'asc'
+          }
+        }
       }
     })
 
-    const totalRewards = totalRewardsResult._sum.alphaReward || 0
+    const totalRewards = bountiesWithConfigs.reduce((sum, bounty) => {
+      const bountyTotal = bounty.winningSpotConfigs.reduce((spotSum, spot) => 
+        spotSum + parseFloat(spot.reward.toString()), 0
+      )
+      return sum + bountyTotal
+    }, 0)
 
     return {
       totalBounties,
@@ -67,6 +76,11 @@ async function getInitialBounties() {
             status: true
           }
         },
+        winningSpotConfigs: {
+          orderBy: {
+            position: 'asc'
+          }
+        },
         _count: {
           select: {
             submissions: true
@@ -79,12 +93,21 @@ async function getInitialBounties() {
       take: 20
     })
 
-    return bounties.map((bounty: any) => ({
-      ...bounty,
-      alphaReward: bounty.alphaReward.toString(),
-      alphaRewardCap: bounty.alphaRewardCap.toString(),
-      submissionCount: bounty._count.submissions
-    }))
+    return bounties.map((bounty: any) => {
+      const totalReward = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => 
+        sum + parseFloat(spot.reward.toString()), 0
+      )
+      const totalRewardCap = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => 
+        sum + parseFloat(spot.rewardCap.toString()), 0
+      )
+      
+      return {
+        ...bounty,
+        alphaReward: totalReward.toString(),
+        alphaRewardCap: totalRewardCap.toString(),
+        submissionCount: bounty._count.submissions
+      }
+    })
   } catch (error) {
     console.error('Error fetching initial bounties:', error)
     return []

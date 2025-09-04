@@ -61,10 +61,13 @@ export async function GET(
       )
     }
 
+    const totalReward = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.reward.toString()), 0)
+    const totalRewardCap = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.rewardCap.toString()), 0)
+    
     const formattedBounty = {
       ...bounty,
-      alphaReward: bounty.alphaReward.toString(),
-      alphaRewardCap: bounty.alphaRewardCap.toString(),
+      alphaReward: totalReward.toString(),
+      alphaRewardCap: totalRewardCap.toString(),
       winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
         ...spot,
         reward: spot.reward.toString(),
@@ -144,12 +147,6 @@ export async function PUT(
     const updateData = await req.json()
     
     // Convert numeric fields
-    if (updateData.alphaReward) {
-      updateData.alphaReward = parseFloat(updateData.alphaReward)
-    }
-    if (updateData.alphaRewardCap) {
-      updateData.alphaRewardCap = parseFloat(updateData.alphaRewardCap)
-    }
     if (updateData.deadline) {
       updateData.deadline = new Date(updateData.deadline)
     }
@@ -165,16 +162,29 @@ export async function PUT(
             walletAddress: true
           }
         },
-        categories: true
+        categories: true,
+        winningSpotConfigs: {
+          orderBy: {
+            position: 'asc'
+          }
+        }
       }
     })
+
+    const totalReward = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.reward.toString()), 0)
+    const totalRewardCap = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.rewardCap.toString()), 0)
 
     return NextResponse.json({
       message: 'Bounty updated successfully',
       bounty: {
         ...bounty,
-        alphaReward: bounty.alphaReward.toString(),
-        alphaRewardCap: bounty.alphaRewardCap.toString()
+        alphaReward: totalReward.toString(),
+        alphaRewardCap: totalRewardCap.toString(),
+        winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
+          ...spot,
+          reward: spot.reward.toString(),
+          rewardCap: spot.rewardCap.toString()
+        }))
       }
     })
 

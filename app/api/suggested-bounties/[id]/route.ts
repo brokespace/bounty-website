@@ -133,16 +133,23 @@ export async function PUT(
         const newBounty = await tx.bounty.create({
           data: {
             title: suggestedBounty.title,
-            description: suggestedBounty.description,
+            problem: suggestedBounty.description, // Map description to problem field
+            info: suggestedBounty.requirements, // Map requirements to info field  
             requirements: suggestedBounty.requirements,
-            alphaReward: suggestedBounty.alphaReward,
-            alphaRewardCap: suggestedBounty.alphaRewardCap,
             rewardDistribution: suggestedBounty.rewardDistribution,
             winningSpots: suggestedBounty.winningSpots,
             deadline: suggestedBounty.deadline,
             acceptedSubmissionTypes: suggestedBounty.acceptedSubmissionTypes,
             creatorId: suggestedBounty.suggestedById, // The user who suggested becomes the creator
-            status: 'ACTIVE'
+            status: 'ACTIVE',
+            winningSpotConfigs: {
+              create: [{
+                position: 1,
+                reward: suggestedBounty.alphaReward,
+                rewardCap: suggestedBounty.alphaRewardCap,
+                hotkey: "1"
+              }]
+            }
           }
         })
 
@@ -183,11 +190,7 @@ export async function PUT(
           alphaReward: result.suggestion.alphaReward.toString(),
           alphaRewardCap: result.suggestion.alphaRewardCap.toString()
         },
-        bounty: {
-          ...result.bounty,
-          alphaReward: result.bounty.alphaReward.toString(),
-          alphaRewardCap: result.bounty.alphaRewardCap.toString()
-        }
+        bounty: result.bounty
       })
 
     } else { // reject

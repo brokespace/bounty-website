@@ -65,17 +65,22 @@ export async function GET(req: NextRequest) {
       skip: offset
     })
 
-    const formattedBounties = bounties.map(bounty => ({
-      ...bounty,
-      alphaReward: bounty.alphaReward.toString(),
-      alphaRewardCap: bounty.alphaRewardCap.toString(),
-      submissionCount: bounty._count.submissions,
-      winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
-        ...spot,
-        reward: spot.reward.toString(),
-        rewardCap: spot.rewardCap.toString()
-      }))
-    }))
+    const formattedBounties = bounties.map(bounty => {
+      const totalReward = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.reward.toString()), 0)
+      const totalRewardCap = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.rewardCap.toString()), 0)
+      
+      return {
+        ...bounty,
+        alphaReward: totalReward.toString(),
+        alphaRewardCap: totalRewardCap.toString(),
+        submissionCount: bounty._count.submissions,
+        winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
+          ...spot,
+          reward: spot.reward.toString(),
+          rewardCap: spot.rewardCap.toString()
+        }))
+      }
+    })
 
     return NextResponse.json({ bounties: formattedBounties })
 
@@ -112,8 +117,6 @@ export async function POST(req: NextRequest) {
       problem,
       info,
       requirements,
-      alphaReward,
-      alphaRewardCap,
       rewardDistribution,
       winningSpots,
       deadline,
@@ -123,7 +126,7 @@ export async function POST(req: NextRequest) {
     } = await req.json()
 
     // Validate required fields
-    if (!title || !problem || !info || !requirements || !alphaReward || !alphaRewardCap) {
+    if (!title || !problem || !info || !requirements) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -166,8 +169,6 @@ export async function POST(req: NextRequest) {
         problem,
         info,
         requirements,
-        alphaReward: parseFloat(alphaReward),
-        alphaRewardCap: parseFloat(alphaRewardCap),
         rewardDistribution: rewardDistribution || 'ALL_AT_ONCE',
         winningSpots: winningSpots || 1,
         deadline: deadline ? new Date(deadline) : null,
@@ -200,12 +201,15 @@ export async function POST(req: NextRequest) {
       }
     })
 
+    const totalReward = bounty.winningSpotConfigs?.reduce((sum, spot) => sum + parseFloat(spot.reward.toString()), 0) || 0
+    const totalRewardCap = bounty.winningSpotConfigs?.reduce((sum, spot) => sum + parseFloat(spot.rewardCap.toString()), 0) || 0
+    
     return NextResponse.json({
       message: 'Bounty created successfully',
       bounty: {
         ...bounty,
-        alphaReward: bounty.alphaReward.toString(),
-        alphaRewardCap: bounty.alphaRewardCap.toString(),
+        alphaReward: totalReward.toString(),
+        alphaRewardCap: totalRewardCap.toString(),
         winningSpotConfigs: bounty.winningSpotConfigs?.map(spot => ({
           ...spot,
           reward: spot.reward.toString(),

@@ -825,7 +825,7 @@ export function UnifiedBountyClient({
                                 <div className="text-right">
                                   <div className="flex items-center gap-1">
                                     <Coins className="h-4 w-4 text-yellow-600" />
-                                    <span className="font-bold text-gray-200">{spot.reward}</span>
+                                    <span className="font-bold text-black">{spot.reward}</span>
                                     <span className="text-sm text-gray-500">α</span>
                                   </div>
                                 </div>

@@ -114,8 +114,6 @@ export interface BountyWithWinningSpots {
   title: string
   description: string
   requirements: string
-  alphaReward: string
-  alphaRewardCap: string
   rewardDistribution: 'ALL_AT_ONCE' | 'OVER_TIME'
   winningSpots: number
   status: string

@@ -145,56 +145,19 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
             <div className="space-y-4">
               {/* Enhanced Reward Display */}
               <div className="p-4 glass-effect border border-primary/20 rounded-xl bg-primary/5">
-                {bounty.winningSpotConfigs && bounty.winningSpotConfigs.length > 0 ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm font-bold text-gradient bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                      <Trophy className="h-4 w-4 text-primary" />
-                      <span>Winning Positions</span>
-                    </div>
-                    <div className="space-y-2">
-                      {bounty.winningSpotConfigs.slice(0, 2).map((spot) => (
-                        <motion.div 
-                          key={spot.id} 
-                          whileHover={{ scale: 1.02 }}
-                          className="flex items-center justify-between p-2 glass-effect border border-accent/20 rounded-lg bg-accent/5"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getPositionColor(spot.position)} bg-gradient-to-r from-primary/20 to-accent/20`}>
-                              {spot.position}
-                            </div>
-                            <span className="font-medium text-sm">{getPositionLabel(spot.position)}</span>
-                            <Badge variant="outline" className="text-xs px-2 py-0.5 glass-effect border-primary/30">
-                              <Key className="h-2 w-2 mr-1" />
-                              {spot.hotkey.slice(0, 6)}...
-                            </Badge>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold text-sm text-gradient">{spot.reward} α</div>
-                          </div>
-                        </motion.div>
-                      ))}
-                      {bounty.winningSpotConfigs.length > 2 && (
-                        <div className="text-xs text-center text-muted-foreground font-medium">
-                          +{bounty.winningSpotConfigs.length - 2} more positions
-                        </div>
-                      )}
-                    </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-bold text-gradient bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                    <Coins className="h-4 w-4 text-primary" />
+                    <span>Alpha Rewards</span>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm font-bold text-gradient bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                      <Coins className="h-4 w-4 text-primary" />
-                      <span>Alpha Rewards</span>
+                  <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-2 p-3 glass-effect border border-primary/20 rounded-lg">
+                    <Coins className="h-5 w-5 text-yellow-500" />
+                    <div>
+                      <div className="font-bold text-lg">{bounty.alphaReward} α</div>
+                      <div className="text-xs text-muted-foreground">Total Alpha Reward</div>
                     </div>
-                    <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-2 p-3 glass-effect border border-primary/20 rounded-lg">
-                      <Coins className="h-5 w-5 text-yellow-500" />
-                      <div>
-                        <div className="font-bold text-lg">{bounty.alphaReward} α</div>
-                        <div className="text-xs text-muted-foreground">Alpha Reward</div>
-                      </div>
-                    </motion.div>
-                  </div>
-                )}
+                  </motion.div>
+                </div>
               </div>
 
               {/* Enhanced Stats */}

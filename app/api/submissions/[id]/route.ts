@@ -30,9 +30,14 @@ export async function GET(
             title: true,
             creatorId: true,
             status: true,
-            alphaReward: true,
-            alphaRewardCap: true,
             rewardDistribution: true
+          },
+          include: {
+            winningSpotConfigs: {
+              orderBy: {
+                position: 'asc'
+              }
+            }
           }
         },
         files: true,
@@ -77,8 +82,12 @@ export async function GET(
       score: submission.score?.toString() || null,
       bounty: {
         ...submission.bounty,
-        alphaReward: submission.bounty.alphaReward.toString(),
-        alphaRewardCap: submission.bounty.alphaRewardCap.toString()
+        alphaReward: submission.bounty.winningSpotConfigs.reduce((sum: number, spot: any) => 
+          sum + parseFloat(spot.reward.toString()), 0
+        ).toString(),
+        alphaRewardCap: submission.bounty.winningSpotConfigs.reduce((sum: number, spot: any) => 
+          sum + parseFloat(spot.rewardCap.toString()), 0
+        ).toString()
       },
       files: submission.files.map(file => ({
         ...file,

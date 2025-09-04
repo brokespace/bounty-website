@@ -36,7 +36,12 @@ export async function GET(req: NextRequest) {
             submissions: true
           }
         },
-        categories: true
+        categories: true,
+        winningSpotConfigs: {
+          orderBy: {
+            position: 'asc'
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -51,8 +56,14 @@ export async function GET(req: NextRequest) {
           select: {
             id: true,
             title: true,
-            alphaReward: true,
             status: true
+          },
+          include: {
+            winningSpotConfigs: {
+              orderBy: {
+                position: 'asc'
+              }
+            }
           }
         },
         scoringJobs: {
@@ -136,12 +147,21 @@ export async function GET(req: NextRequest) {
     })
 
     // Format data
-    const formattedBounties = userBounties.map(bounty => ({
-      ...bounty,
-      alphaReward: bounty.alphaReward.toString(),
-      alphaRewardCap: bounty.alphaRewardCap.toString(),
-      submissionCount: bounty._count.submissions
-    }))
+    const formattedBounties = userBounties.map(bounty => {
+      const totalReward = bounty.winningSpotConfigs.reduce((sum, spot) => 
+        sum + parseFloat(spot.reward.toString()), 0
+      )
+      const totalRewardCap = bounty.winningSpotConfigs.reduce((sum, spot) => 
+        sum + parseFloat(spot.rewardCap.toString()), 0
+      )
+      
+      return {
+        ...bounty,
+        alphaReward: totalReward.toString(),
+        alphaRewardCap: totalRewardCap.toString(),
+        submissionCount: bounty._count.submissions
+      }
+    })
 
     const formattedSubmissions = userSubmissions.map(submission => ({
       ...submission,
@@ -149,7 +169,9 @@ export async function GET(req: NextRequest) {
       voteCount: submission._count.votes,
       bounty: {
         ...submission.bounty,
-        alphaReward: submission.bounty.alphaReward.toString()
+        alphaReward: submission.bounty.winningSpotConfigs.reduce((sum, spot) => 
+          sum + parseFloat(spot.reward.toString()), 0
+        ).toString()
       }
     }))
 
@@ -160,8 +182,8 @@ export async function GET(req: NextRequest) {
 
     const formattedSuggestedBounties = userSuggestedBounties.map(suggestion => ({
       ...suggestion,
-      alphaReward: suggestion.alphaReward.toString(),
-      alphaRewardCap: suggestion.alphaRewardCap.toString()
+      alphaReward: suggestion.alphaReward ? suggestion.alphaReward.toString() : '0',
+      alphaRewardCap: suggestion.alphaRewardCap ? suggestion.alphaRewardCap.toString() : '0'
     }))
 
     return NextResponse.json({

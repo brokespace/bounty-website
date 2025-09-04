@@ -16,14 +16,14 @@ export async function GET() {
       }
     })
 
-    // Get total rewards (sum of all alphaReward values)
-    const totalRewardsResult = await prisma.bounty.aggregate({
+    // Get total rewards (sum of all winning spot rewards)
+    const totalRewardsResult = await prisma.winningSpot.aggregate({
       _sum: {
-        alphaReward: true
+        reward: true
       }
     })
 
-    const totalRewards = totalRewardsResult._sum.alphaReward || 0
+    const totalRewards = totalRewardsResult._sum.reward || 0
 
     // Get additional stats
     const completedBounties = await prisma.bounty.count({
