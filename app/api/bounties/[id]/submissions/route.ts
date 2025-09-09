@@ -230,6 +230,8 @@ export async function POST(
       }
     })
 
+    console.log(`Submission created with contentType: ${contentType}, found screener support:`, !!screenerSupport)
+
     // Check if this submission expects files to be uploaded
     const expectsFiles = contentType === 'FILE' || contentType === 'MIXED'
     
@@ -238,6 +240,7 @@ export async function POST(
     if (screenerSupport?.screener && !expectsFiles) {
       try {
         const watcherUrl = process.env.WATCHER_URL
+        console.log(`Triggering watcher for submission ${submission.id} with contentType: ${contentType}`)
         const processUrl = `${watcherUrl}/process-submission/${submission.id}`
         await fetch(processUrl, {
           method: 'POST',
@@ -245,10 +248,13 @@ export async function POST(
             'Content-Type': 'application/json'
           }
         })
+        console.log(`Watcher notification sent successfully for submission ${submission.id}`)
       } catch (error) {
         console.error('Failed to trigger screener processing:', error)
         // Don't fail the submission creation if screener call fails
       }
+    } else {
+      console.log(`Watcher notification skipped for submission ${submission.id}. screenerSupport: ${!!screenerSupport}, expectsFiles: ${expectsFiles}`)
     }
 
     return NextResponse.json({

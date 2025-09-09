@@ -83,7 +83,7 @@ export function NetworkClient() {
   const getScreenerStatus = (screener: ScreenerWithSupport) => {
     if (screener.currentJobs >= screener.maxConcurrent) return { text: 'Busy', color: 'bg-red-500', variant: 'destructive' as const }
     if (screener.currentJobs > 0) return { text: 'Scoring', color: 'bg-yellow-500', variant: 'default' as const }
-    return { text: 'Available', color: 'bg-green-500', variant: 'default' as const }
+    return { text: 'Available for work', color: 'bg-green-500', variant: 'default' as const }
   }
 
   const getActiveBounties = (screener: ScreenerWithSupport) => {
@@ -91,7 +91,7 @@ export function NetworkClient() {
       return []
     }
 
-    const activeBounties = []
+    const activeBounties: any[] = []
 
     // Add specific active bounties
     screener.supportedBounties.forEach(support => {
@@ -113,7 +113,7 @@ export function NetworkClient() {
   }
 
   const statsData = [
-    { label: "Available", value: loading ? "..." : stats.available.toString(), icon: <Activity className="h-5 w-5" />, color: "text-green-500" },
+    { label: "Available for work", value: loading ? "..." : stats.available.toString(), icon: <Activity className="h-5 w-5" />, color: "text-green-500" },
     { label: "Busy", value: loading ? "..." : stats.busy.toString(), icon: <Clock className="h-5 w-5" />, color: "text-red-500" },
     { label: "Total", value: loading ? "..." : stats.total.toString(), icon: <Users className="h-5 w-5" />, color: "text-primary" }
   ]
@@ -144,7 +144,7 @@ export function NetworkClient() {
             className="text-5xl md:text-7xl font-bold tracking-tight"
           >
             <span className="text-gradient animate-gradient bg-gradient-to-r from-primary via-accent to-purple bg-clip-text text-transparent">
-              Network Status
+              Network Grader Status
             </span>
           </motion.h1>
           
@@ -154,7 +154,7 @@ export function NetworkClient() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-xl md:text-2xl text-muted-foreground leading-relaxed"
           >
-            Real-time monitoring of the network.
+            Network grader status and activity.
           </motion.p>
         </motion.div>
       </section>

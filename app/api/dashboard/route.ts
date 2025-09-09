@@ -53,11 +53,6 @@ export async function GET(req: NextRequest) {
       where: { submitterId: userId },
       include: {
         bounty: {
-          select: {
-            id: true,
-            title: true,
-            status: true
-          },
           include: {
             winningSpotConfigs: {
               orderBy: {
@@ -68,12 +63,7 @@ export async function GET(req: NextRequest) {
         },
         scoringJobs: {
           include: {
-            screener: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
+            screener: true
           }
         },
         _count: {
@@ -89,16 +79,7 @@ export async function GET(req: NextRequest) {
 
     // Get user's suggested bounties
     const userSuggestedBounties = await prisma.suggestedBounty.findMany({
-      where: { suggestedById: userId },
-      include: {
-        convertedBounty: {
-          select: {
-            id: true,
-            title: true,
-            status: true
-          }
-        }
-      },
+      where: { creatorId: userId },
       orderBy: {
         createdAt: 'desc'
       }
@@ -167,12 +148,12 @@ export async function GET(req: NextRequest) {
       ...submission,
       score: submission.score?.toString() || null,
       voteCount: submission._count.votes,
-      bounty: {
+      bounty: submission.bounty ? {
         ...submission.bounty,
-        alphaReward: submission.bounty.winningSpotConfigs.reduce((sum, spot) => 
+        alphaReward: submission.bounty.winningSpotConfigs?.reduce((sum, spot) => 
           sum + parseFloat(spot.reward.toString()), 0
-        ).toString()
-      }
+        ).toString() || '0'
+      } : null
     }))
 
     const formattedActivity = recentActivity.map(activity => ({
@@ -182,10 +163,8 @@ export async function GET(req: NextRequest) {
 
     const formattedSuggestedBounties = userSuggestedBounties.map(suggestion => ({
       ...suggestion,
-      alphaReward: suggestion.alphaReward ? suggestion.alphaReward.toString() : '0',
-      alphaRewardCap: suggestion.alphaRewardCap ? suggestion.alphaRewardCap.toString() : '0'
     }))
-
+    console.log("submissions", formattedSubmissions)
     return NextResponse.json({
       user: {
         id: session.user.id,

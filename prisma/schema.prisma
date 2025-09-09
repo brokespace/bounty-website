@@ -52,6 +52,8 @@ model User {
   submissions       Submission[]
   suggestedBounties SuggestedBounty[]
   votes             Vote[]
+  bugReports        BugReport[]
+  walletChangeLogs  WalletChangeLog[]
 
   @@map("users")
 }
@@ -109,7 +111,7 @@ model Submission {
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   validatedAt    DateTime?
-  bountyId       String?
+  bountyId       String
   submitterId    String
   suggestedBountyId String?
   contentType    SubmissionContentType @default(FILE)
@@ -118,7 +120,7 @@ model Submission {
   tosAccepted    Boolean               @default(false)
   tosAcceptedAt  DateTime?
   files          SubmissionFile[]
-  bounty         Bounty?               @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  bounty         Bounty               @relation(fields: [bountyId], references: [id], onDelete: Cascade)
   suggestedBounty SuggestedBounty?     @relation(fields: [suggestedBountyId], references: [id], onDelete: Cascade)
   submitter      User                  @relation(fields: [submitterId], references: [id])
   validationLogs ValidationLog[]
@@ -180,7 +182,7 @@ model SuggestedBounty {
   requirements            String                  // Requirements for bounty completion
   rewardDistribution      RewardDistribution      @default(ALL_AT_ONCE)
   winningSpots            Int                     @default(1)
-  status                  BountyStatus            @default(DRAFT)
+  status                  SuggestedBountyStatus            @default(PENDING)
   createdAt               DateTime                @default(now())
   updatedAt               DateTime                @updatedAt
   deadline                DateTime?
@@ -361,4 +363,62 @@ model WinningSpot {
   @@unique([suggestedBountyId, position])
   @@unique([suggestedBountyId, hotkey])
   @@map("winning_spots")
+}
+
+model BugReport {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    BugReportCategory @default(OTHER)
+  priority    BugReportPriority @default(MEDIUM)
+  status      BugReportStatus   @default(OPEN)
+  reportedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  reporterId  String?
+  reporter    User?    @relation(fields: [reporterId], references: [id])
+  
+  @@map("bug_reports")
+}
+
+enum BugReportCategory {
+  UI_UX
+  FUNCTIONALITY
+  PERFORMANCE
+  SECURITY
+  OTHER
+}
+
+enum BugReportPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BugReportStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model WalletChangeLog {
+  id            String   @id @default(cuid())
+  userId        String
+  oldAddress    String?  // Previous wallet address (null for first wallet)
+  newAddress    String?  // New wallet address (null when removing wallet)
+  changeType    WalletChangeType
+  createdAt     DateTime @default(now())
+  ipAddress     String?  // IP address of the user making the change
+  userAgent     String?  // User agent of the browser/client
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("wallet_change_logs")
+}
+
+enum WalletChangeType {
+  ADDED      // First time setting a wallet
+  UPDATED    // Changing from one wallet to another
+  REMOVED    // Removing wallet address
 }

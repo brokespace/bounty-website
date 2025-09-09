@@ -149,9 +149,22 @@ export function ScoringJobDetailClient({
                 className="relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-purple/20 blur-2xl animate-pulse-slow -z-10 rounded-full" />
-                <p className="text-xl text-muted-foreground leading-relaxed relative z-10">
-                  Validation of submission for "{currentScoringJob.submission.bounty.title}"
-                </p>
+                <div className="flex items-center gap-3 relative z-10">
+                  <p className="text-xl text-muted-foreground leading-relaxed">
+                    Validation of submission for
+                  </p>
+                  <Link href={`/bounties/${currentScoringJob.submission.bounty.id}`}>
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Button variant="outline" className="glass-effect border border-primary/30 hover:border-primary/60 text-primary hover:text-accent hover:bg-primary/10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-primary/20">
+                        <Trophy className="h-4 w-4 mr-2" />
+                        {currentScoringJob.submission.bounty.title}
+                      </Button>
+                    </motion.div>
+                  </Link>
+                </div>
               </motion.div>
             </div>
 
@@ -527,72 +540,6 @@ export function ScoringJobDetailClient({
         </motion.div>
       </div>
 
-      {/* Bounty Context */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
-        className="card-enhanced relative border border-purple/30 hover:border-purple/50 bg-card"
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-purple/8 via-primary/8 to-accent/8 animate-gradient-shift" />
-        <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-gradient-to-br from-purple/20 to-primary/20 rounded-full blur-3xl animate-float" />
-        <div className="p-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="flex items-center gap-3 mb-6"
-          >
-                          <div className="p-3 rounded-xl bg-gradient-to-br from-purple/20 to-primary/20">
-                <Trophy className="h-5 w-5 text-purple-400" />
-              </div>
-            <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-purple via-primary to-accent bg-clip-text text-transparent">
-              Related Bounty
-            </h2>
-          </motion.div>
-          <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <motion.h3
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.0 }}
-                  className="font-bold text-xl text-gradient bg-gradient-to-r from-purple to-primary bg-clip-text text-transparent mb-2"
-                >
-                  {currentScoringJob.submission.bounty.title}
-                </motion.h3>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.2 }}
-                  className="text-muted-foreground leading-relaxed"
-                >
-                  {currentScoringJob.submission.bounty.description}
-                </motion.p>
-              </div>
-              <Link href={`/bounties/${currentScoringJob.submission.bounty.id}`}>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button variant="outline" className="glass-effect border border-purple/30 hover:border-purple/60 text-purple-400 hover:text-purple-300 hover:bg-purple/10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple/20">
-                    View Bounty
-                  </Button>
-                </motion.div>
-              </Link>
-            </div>
-          
-          {currentScoringJob.submission.bounty.requirements && (
-            <div>
-              <Label className="text-sm font-medium">Requirements</Label>
-              <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
-                {currentScoringJob.submission.bounty.requirements}
-              </p>
-            </div>
-          )}
-          </div>
-        </div>
-      </motion.div>
 
       {/* Live Logs */}
       <motion.div

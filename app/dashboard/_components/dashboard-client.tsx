@@ -41,8 +41,10 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
     setIsLoading(true)
     try {
       const response = await fetch('/api/dashboard')
+      console.log("response", response)
       if (response.ok) {
         const newData = await response.json()
+        console.log("newData", newData)
         setData(newData)
       }
     } catch (error) {
@@ -361,7 +363,7 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
             </Link>
           </motion.div>
 
-          {data?.submissions?.length === 0 ? (
+          {!data?.submissions || data?.submissions?.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

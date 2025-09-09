@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import { Navigation } from '@/components/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Wallet, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -31,6 +32,7 @@ export default function SignInPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
+        <Navigation />
         <div className="mb-6">
           <Link 
             href="/" 

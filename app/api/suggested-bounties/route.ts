@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
         where.status = status.toUpperCase()
       }
     } else {
-      where.suggestedById = session.user.id
+      where.creatorId = session.user.id
       if (status && status !== 'all') {
         where.status = status.toUpperCase()
       }
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const suggestedBounties = await prisma.suggestedBounty.findMany({
       where,
       include: {
-        suggestedBy: {
+        creator: {
           select: {
             id: true,
             username: true,
@@ -47,7 +47,8 @@ export async function GET(req: NextRequest) {
           }
         },
         categories: true,
-        convertedBounty: {
+        winningSpotConfigs: true,
+        bounty: {
           select: {
             id: true,
             title: true,
@@ -62,11 +63,7 @@ export async function GET(req: NextRequest) {
       skip: offset
     })
 
-    const formattedSuggestions = suggestedBounties.map(suggestion => ({
-      ...suggestion,
-      alphaReward: suggestion.alphaReward.toString(),
-      alphaRewardCap: suggestion.alphaRewardCap.toString()
-    }))
+    const formattedSuggestions = suggestedBounties
 
     return NextResponse.json({ suggestions: formattedSuggestions })
 
@@ -93,18 +90,19 @@ export async function POST(req: NextRequest) {
 
     const {
       title,
-      description,
+      problem,
+      info,
       requirements,
-      alphaReward,
-      alphaRewardCap,
       rewardDistribution,
       winningSpots,
       deadline,
-      acceptedSubmissionTypes
+      acceptedSubmissionTypes,
+      categories,
+      winningSpotConfigs
     } = await req.json()
 
     // Validate required fields
-    if (!title || !description || !requirements || !alphaReward || !alphaRewardCap) {
+    if (!title || !problem || !info || !requirements) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -128,39 +126,49 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create suggested bounty
-    const suggestedBounty = await prisma.suggestedBounty.create({
-      data: {
-        title,
-        description,
-        requirements,
-        alphaReward: parseFloat(alphaReward),
-        alphaRewardCap: parseFloat(alphaRewardCap),
-        rewardDistribution: rewardDistribution || 'ALL_AT_ONCE',
-        winningSpots: winningSpots || 1,
-        deadline: deadline ? new Date(deadline) : null,
-        acceptedSubmissionTypes: acceptedSubmissionTypes,
-        suggestedById: session.user.id
-      },
-      include: {
-        suggestedBy: {
-          select: {
-            id: true,
-            username: true,
-            walletAddress: true
-          }
+    // Create suggested bounty with transaction to handle categories and winning spots
+    const suggestedBounty = await prisma.$transaction(async (tx) => {
+      const newSuggestedBounty = await tx.suggestedBounty.create({
+        data: {
+          title,
+          problem,
+          info,
+          requirements,
+          rewardDistribution: rewardDistribution || 'ALL_AT_ONCE',
+          winningSpots: winningSpots || 1,
+          deadline: deadline ? new Date(deadline) : null,
+          acceptedSubmissionTypes: acceptedSubmissionTypes,
+          creatorId: session.user.id,
+          categories: categories && categories.length > 0 ? {
+            connect: categories.map((catId: string) => ({ id: catId }))
+          } : undefined,
+          winningSpotConfigs: winningSpotConfigs && winningSpotConfigs.length > 0 ? {
+            create: winningSpotConfigs.map((ws: any) => ({
+              position: ws.position,
+              reward: parseFloat(ws.reward),
+              rewardCap: parseFloat(ws.rewardCap),
+              hotkey: ws.hotkey
+            }))
+          } : undefined
         },
-        categories: true
-      }
+        include: {
+          creator: {
+            select: {
+              id: true,
+              username: true,
+              walletAddress: true
+            }
+          },
+          categories: true,
+          winningSpotConfigs: true
+        }
+      })
+      return newSuggestedBounty
     })
 
     return NextResponse.json({
       message: 'Bounty suggestion created successfully',
-      suggestion: {
-        ...suggestedBounty,
-        alphaReward: suggestedBounty.alphaReward.toString(),
-        alphaRewardCap: suggestedBounty.alphaRewardCap.toString()
-      }
+      suggestion: suggestedBounty
     }, { status: 201 })
 
   } catch (error) {

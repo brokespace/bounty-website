@@ -50,9 +50,9 @@ export async function GET(
     // 4. Bounty is completed (public access)
     const canAccess = 
       file.submission.submitterId === session.user.id ||
-      file.submission.bounty.creatorId === session.user.id ||
+      (file.submission.bounty && file.submission.bounty.creatorId === session.user.id) ||
       session.user.isAdmin === true ||
-      file.submission.bounty.status === 'COMPLETED'
+      (file.submission.bounty && file.submission.bounty.status === 'COMPLETED')
 
     if (!canAccess) {
       return NextResponse.json(

@@ -160,18 +160,19 @@ export function UnifiedBountyClient({
     setIsLoading(true)
     try {
       // Determine content type based on what user has filled
+      const currentBountyRef = bountyData || bounty
       let contentType = 'FILE' // default
       const hasUrls = submissionForm.urls.some(url => url.trim() !== '')
       const hasText = submissionForm.textContent.trim() !== ''
       const hasFiles = pendingFilesCount > 0
 
-      if (currentBounty?.acceptedSubmissionTypes?.includes('MIXED')) {
+      if (currentBountyRef?.acceptedSubmissionTypes?.includes('MIXED')) {
         contentType = 'MIXED'
-      } else if (currentBounty?.acceptedSubmissionTypes?.includes('URL') && hasUrls && !hasText && !hasFiles) {
+      } else if (currentBountyRef?.acceptedSubmissionTypes?.includes('URL') && hasUrls && !hasText && !hasFiles) {
         contentType = 'URL'
-      } else if (currentBounty?.acceptedSubmissionTypes?.includes('TEXT') && hasText && !hasUrls && !hasFiles) {
+      } else if (currentBountyRef?.acceptedSubmissionTypes?.includes('TEXT') && hasText && !hasUrls && !hasFiles) {
         contentType = 'TEXT'
-      } else if (currentBounty?.acceptedSubmissionTypes?.includes('FILE') && (hasFiles || (!hasUrls && !hasText))) {
+      } else if (currentBountyRef?.acceptedSubmissionTypes?.includes('FILE') && (hasFiles || (!hasUrls && !hasText))) {
         contentType = 'FILE'
       }
 
@@ -790,7 +791,7 @@ export function UnifiedBountyClient({
                             return (
                               <div
                                 key={spot.id}
-                                className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-primary/30 hover:border-primary/50 transition-colors"
+                                className={`flex items-center justify-between p-3 bg-gradient-to-r ${styles.gradient} rounded-xl border ${styles.border} hover:border-primary/50 transition-colors shadow-lg ${styles.shadowColor}`}
                               >
                                 {/* Left side - Position info */}
                                 <div className="flex items-center gap-3">
@@ -801,7 +802,7 @@ export function UnifiedBountyClient({
                                     </div>
                                   </div>
                                   <div className="grid gap-1 items-start">
-                                    <div className="text-sm font-medium text-gray-900 justify-self-start">
+                                    <div className={`text-sm font-medium ${styles.textColor} justify-self-start`}>
                                       {getPositionLabel(spot.position)}
                                     </div>
                                     {/* Hotkey display */}
@@ -825,8 +826,8 @@ export function UnifiedBountyClient({
                                 <div className="text-right">
                                   <div className="flex items-center gap-1">
                                     <Coins className="h-4 w-4 text-yellow-600" />
-                                    <span className="font-bold text-black">{spot.reward}</span>
-                                    <span className="text-sm text-gray-500">α</span>
+                                    <span className={`font-bold ${styles.textColor}`}>{spot.reward}</span>
+                                    <span className={`text-sm ${styles.textColor} opacity-70`}>α</span>
                                   </div>
                                 </div>
                               </div>

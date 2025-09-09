@@ -36,17 +36,41 @@ export function LogStream({ jobId }: LogStreamProps) {
 
       const data = await response.json()
       const newLogs: LogEntry[] = []
-      if (data.result) {
-        console.log(data.result)
-        data.result.forEach((stream: any) => {
-          stream.values.forEach(([timestamp, message]: [string, string]) => {
-            newLogs.push({
-              timestamp: new Date(Number(timestamp) / 1000000).toISOString(),
-              message
+      if (data && Array.isArray(data)) {
+        data.forEach((event: any) => {
+          // Extract message from MessageTemplateTokens
+          let message = 'No message'
+          if (Array.isArray(event.MessageTemplateTokens) && event.MessageTemplateTokens.length > 0) {
+            message = event.MessageTemplateTokens.map((token: any) => token.Text).join('')
+          }
+
+          // Extract job_id, process_id, score, service, source, submission_type from Properties
+          let jobIdProp = null
+          let processId = null
+          let score = null
+          let service = null
+          let source = null
+          let submissionType = null
+
+          if (Array.isArray(event.Properties)) {
+            event.Properties.forEach((prop: any) => {
+              if (prop.Name === 'job_id') jobIdProp = prop.Value
+              if (prop.Name === 'process_id') processId = prop.Value
+              if (prop.Name === 'score') score = prop.Value
+              if (prop.Name === 'service') service = prop.Value
+              if (prop.Name === 'source') source = prop.Value
+              if (prop.Name === 'submission_type') submissionType = prop.Value
             })
+          }
+
+          newLogs.push({
+            timestamp: event.Timestamp,
+            message,
           })
         })
       }
+      // Sort logs by timestamp
+      newLogs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
       setLogs(newLogs)
       setIsConnected(true)

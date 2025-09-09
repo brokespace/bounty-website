@@ -15,9 +15,10 @@ export default async function DashboardPage() {
   // Empty initial data - will be loaded client-side
   const dashboardData = {
     user: session.user,
-    stats: { totalBounties: 0, totalSubmissions: 0 },
+    stats: { totalBounties: 0, totalSubmissions: 0, totalSuggestedBounties: 0 },
     bounties: [],
     submissions: [],
+    suggestedBounties: [],
     recentActivity: []
   }
 

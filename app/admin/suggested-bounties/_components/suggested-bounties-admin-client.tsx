@@ -5,8 +5,6 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ArrowLeft, CheckCircle, XCircle, Clock, Eye, Users, Coins, Calendar, FileText, AlertCircle } from 'lucide-react'
@@ -17,10 +15,9 @@ import { formatDistanceToNow } from 'date-fns'
 interface SuggestedBounty {
   id: string
   title: string
-  description: string
+  problem: string
+  info: string
   requirements: string
-  alphaReward: string
-  alphaRewardCap: string
   rewardDistribution: string
   winningSpots: number
   deadline: string | null
@@ -28,18 +25,22 @@ interface SuggestedBounty {
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   createdAt: string
   updatedAt: string
-  reviewedAt: string | null
-  reviewNotes: string | null
-  suggestedBy: {
+  creator: {
     id: string
     username: string | null
     walletAddress: string | null
   }
-  convertedBounty: {
+  bounty: {
     id: string
     title: string
     status: string
   } | null
+  winningSpotConfigs: {
+    position: number
+    reward: number
+    rewardCap: number
+    hotkey: string
+  }[]
 }
 
 interface SuggestedBountiesAdminClientProps {
@@ -51,7 +52,6 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState('PENDING')
   const [selectedSuggestion, setSelectedSuggestion] = useState<SuggestedBounty | null>(null)
-  const [reviewNotes, setReviewNotes] = useState('')
   const [isReviewing, setIsReviewing] = useState(false)
 
   const fetchSuggestions = async () => {
@@ -85,8 +85,7 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action,
-          reviewNotes: reviewNotes.trim() || null
+          action
         }),
       })
 
@@ -103,7 +102,6 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
       )
       
       setSelectedSuggestion(null)
-      setReviewNotes('')
       fetchSuggestions()
       
     } catch (error: any) {
@@ -216,15 +214,18 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
                       <h3 className="text-lg font-semibold">{suggestion.title}</h3>
                       {getStatusBadge(suggestion.status)}
                     </div>
-                    <p className="text-muted-foreground mb-2 line-clamp-2">{suggestion.description}</p>
+                    <p className="text-muted-foreground mb-2 line-clamp-2">{suggestion.problem}</p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        {suggestion.suggestedBy.username || `User ${suggestion.suggestedBy.walletAddress?.slice(0, 8) || 'Unknown'}...`}
+                        {suggestion.creator.username || `User ${suggestion.creator.walletAddress?.slice(0, 8) || 'Unknown'}...`}
                       </span>
                       <span className="flex items-center gap-1">
                         <Coins className="w-4 h-4" />
-                        {suggestion.alphaReward}α - {suggestion.alphaRewardCap}α
+                        {suggestion.winningSpotConfigs.length > 0 
+                          ? `${suggestion.winningSpotConfigs[0].reward}α - ${suggestion.winningSpotConfigs[0].rewardCap}α`
+                          : 'No rewards configured'
+                        }
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
@@ -249,23 +250,18 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
                   {getSubmissionTypeBadges(suggestion.acceptedSubmissionTypes)}
                 </div>
 
-                {suggestion.status === 'APPROVED' && suggestion.convertedBounty && (
+                {suggestion.status === 'APPROVED' && suggestion.bounty && (
                   <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                     <p className="text-sm text-green-800">
                       <CheckCircle className="w-4 h-4 inline mr-1" />
                       Approved and converted to bounty: 
-                      <Link href={`/bounties/${suggestion.convertedBounty.id}`} className="ml-1 underline font-medium">
-                        {suggestion.convertedBounty.title}
+                      <Link href={`/bounties/${suggestion.bounty.id}`} className="ml-1 underline font-medium">
+                        {suggestion.bounty.title}
                       </Link>
                     </p>
                   </div>
                 )}
 
-                {suggestion.reviewNotes && (
-                  <div className="mt-3 p-3 bg-muted rounded-lg">
-                    <p className="text-sm"><strong>Review Notes:</strong> {suggestion.reviewNotes}</p>
-                  </div>
-                )}
               </CardContent>
             </Card>
           ))}
@@ -280,15 +276,20 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
               <DialogHeader>
                 <DialogTitle>{selectedSuggestion.title}</DialogTitle>
                 <DialogDescription>
-                  Suggested by {selectedSuggestion.suggestedBy.username || `User ${selectedSuggestion.suggestedBy.walletAddress?.slice(0, 8) || 'Unknown'}...`} • 
+                  Suggested by {selectedSuggestion.creator.username || `User ${selectedSuggestion.creator.walletAddress?.slice(0, 8) || 'Unknown'}...`} • 
                   {formatDistanceToNow(new Date(selectedSuggestion.createdAt), { addSuffix: true })}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-6">
                 <div>
-                  <h4 className="font-semibold mb-2">Description</h4>
-                  <p className="text-sm text-muted-foreground">{selectedSuggestion.description}</p>
+                  <h4 className="font-semibold mb-2">Problem Description</h4>
+                  <p className="text-sm text-muted-foreground">{selectedSuggestion.problem}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Technical Details</h4>
+                  <p className="text-sm text-muted-foreground">{selectedSuggestion.info}</p>
                 </div>
 
                 <div>
@@ -300,10 +301,18 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
                   <div>
                     <h4 className="font-semibold mb-2">Reward Structure</h4>
                     <div className="text-sm space-y-1">
-                      <p>Current Reward: {selectedSuggestion.alphaReward}α</p>
-                      <p>Reward Cap: {selectedSuggestion.alphaRewardCap}α</p>
-                      <p>Distribution: {selectedSuggestion.rewardDistribution === 'ALL_AT_ONCE' ? '60% All at Once' : '100% Over Time'}</p>
+                      <p>Distribution: {selectedSuggestion.rewardDistribution === 'ALL_AT_ONCE' ? 'All at Once' : 'Over Time'}</p>
                       <p>Winning Spots: {selectedSuggestion.winningSpots}</p>
+                      {selectedSuggestion.winningSpotConfigs.length > 0 && (
+                        <div className="mt-2">
+                          <p className="font-medium">Reward Configuration:</p>
+                          {selectedSuggestion.winningSpotConfigs.map((config, index) => (
+                            <p key={index} className="ml-2">
+                              Position {config.position}: {config.reward}α - {config.rewardCap}α
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -324,17 +333,6 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
 
                 {selectedSuggestion.status === 'PENDING' && (
                   <div className="space-y-4 border-t pt-6">
-                    <div>
-                      <Label htmlFor="reviewNotes">Review Notes (Optional)</Label>
-                      <Textarea
-                        id="reviewNotes"
-                        placeholder="Add any comments about your decision..."
-                        value={reviewNotes}
-                        onChange={(e) => setReviewNotes(e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-
                     <div className="flex gap-4">
                       <Button
                         variant="outline"
@@ -368,17 +366,10 @@ export function SuggestedBountiesAdminClient({ user }: SuggestedBountiesAdminCli
                       <span className="font-semibold">
                         {selectedSuggestion.status === 'APPROVED' ? 'Approved' : 'Rejected'}
                       </span>
-                      {selectedSuggestion.reviewedAt && (
-                        <span className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(selectedSuggestion.reviewedAt), { addSuffix: true })}
-                        </span>
-                      )}
+                      <span className="text-sm text-muted-foreground">
+                        {formatDistanceToNow(new Date(selectedSuggestion.updatedAt), { addSuffix: true })}
+                      </span>
                     </div>
-                    {selectedSuggestion.reviewNotes && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        <strong>Notes:</strong> {selectedSuggestion.reviewNotes}
-                      </p>
-                    )}
                   </div>
                 )}
               </div>

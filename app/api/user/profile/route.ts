@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 const updateProfileSchema = z.object({
   username: z.string().min(3).max(50).optional(),
   walletAddress: z.string().optional(),
+  isNewUser: z.boolean().optional(),
 })
 
 export async function PUT(request: NextRequest) {
@@ -21,6 +22,11 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = updateProfileSchema.parse(body)
+
+    // For new users, wallet address is required
+    if (validatedData.isNewUser && (!validatedData.walletAddress || validatedData.walletAddress.trim() === '')) {
+      return NextResponse.json({ error: 'Wallet address is required for new users' }, { status: 400 })
+    }
 
     // Check if username is already taken (if provided)
     if (validatedData.username) {

@@ -23,7 +23,7 @@ export async function GET(
     const suggestedBounty = await prisma.suggestedBounty.findUnique({
       where: { id: params.id },
       include: {
-        suggestedBy: {
+        creator: {
           select: {
             id: true,
             username: true,
@@ -31,7 +31,8 @@ export async function GET(
           }
         },
         categories: true,
-        convertedBounty: {
+        winningSpotConfigs: true,
+        bounty: {
           select: {
             id: true,
             title: true,
@@ -49,7 +50,7 @@ export async function GET(
     }
 
     // Users can only view their own suggestions, admins can view all
-    if (!session.user.isAdmin && suggestedBounty.suggestedById !== session.user.id) {
+    if (!session.user.isAdmin && suggestedBounty.creatorId !== session.user.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -57,11 +58,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      suggestion: {
-        ...suggestedBounty,
-        alphaReward: suggestedBounty.alphaReward.toString(),
-        alphaRewardCap: suggestedBounty.alphaRewardCap.toString()
-      }
+      suggestion: suggestedBounty
     })
 
   } catch (error) {
@@ -95,7 +92,7 @@ export async function PUT(
       )
     }
 
-    const { action, reviewNotes } = await req.json()
+    const { action } = await req.json()
 
     if (!action || !['approve', 'reject'].includes(action)) {
       return NextResponse.json(
@@ -108,7 +105,9 @@ export async function PUT(
     const suggestedBounty = await prisma.suggestedBounty.findUnique({
       where: { id: params.id },
       include: {
-        suggestedBy: true
+        creator: true,
+        categories: true,
+        winningSpotConfigs: true
       }
     })
 
@@ -133,22 +132,25 @@ export async function PUT(
         const newBounty = await tx.bounty.create({
           data: {
             title: suggestedBounty.title,
-            problem: suggestedBounty.description, // Map description to problem field
-            info: suggestedBounty.requirements, // Map requirements to info field  
+            problem: suggestedBounty.problem,
+            info: suggestedBounty.info,
             requirements: suggestedBounty.requirements,
             rewardDistribution: suggestedBounty.rewardDistribution,
             winningSpots: suggestedBounty.winningSpots,
             deadline: suggestedBounty.deadline,
             acceptedSubmissionTypes: suggestedBounty.acceptedSubmissionTypes,
-            creatorId: suggestedBounty.suggestedById, // The user who suggested becomes the creator
+            creatorId: suggestedBounty.creatorId,
             status: 'ACTIVE',
+            categories: {
+              connect: suggestedBounty.categories.map(cat => ({ id: cat.id }))
+            },
             winningSpotConfigs: {
-              create: [{
-                position: 1,
-                reward: suggestedBounty.alphaReward,
-                rewardCap: suggestedBounty.alphaRewardCap,
-                hotkey: "1"
-              }]
+              create: suggestedBounty.winningSpotConfigs.map(ws => ({
+                position: ws.position,
+                reward: ws.reward,
+                rewardCap: ws.rewardCap,
+                hotkey: ws.hotkey
+              }))
             }
           }
         })
@@ -158,19 +160,19 @@ export async function PUT(
           where: { id: params.id },
           data: {
             status: 'APPROVED',
-            reviewedAt: new Date(),
-            reviewNotes,
-            convertedBountyId: newBounty.id
+            bountyId: newBounty.id
           },
           include: {
-            suggestedBy: {
+            creator: {
               select: {
                 id: true,
                 username: true,
                 walletAddress: true
               }
             },
-            convertedBounty: {
+            categories: true,
+            winningSpotConfigs: true,
+            bounty: {
               select: {
                 id: true,
                 title: true,
@@ -185,11 +187,7 @@ export async function PUT(
 
       return NextResponse.json({
         message: 'Bounty suggestion approved and bounty created',
-        suggestion: {
-          ...result.suggestion,
-          alphaReward: result.suggestion.alphaReward.toString(),
-          alphaRewardCap: result.suggestion.alphaRewardCap.toString()
-        },
+        suggestion: result.suggestion,
         bounty: result.bounty
       })
 
@@ -198,27 +196,23 @@ export async function PUT(
         where: { id: params.id },
         data: {
           status: 'REJECTED',
-          reviewedAt: new Date(),
-          reviewNotes
         },
         include: {
-          suggestedBy: {
+          creator: {
             select: {
               id: true,
               username: true,
               walletAddress: true
             }
-          }
+          },
+          categories: true,
+          winningSpotConfigs: true
         }
       })
 
       return NextResponse.json({
         message: 'Bounty suggestion rejected',
-        suggestion: {
-          ...updatedSuggestion,
-          alphaReward: updatedSuggestion.alphaReward.toString(),
-          alphaRewardCap: updatedSuggestion.alphaRewardCap.toString()
-        }
+        suggestion: updatedSuggestion
       })
     }
 
@@ -258,7 +252,7 @@ export async function DELETE(
     }
 
     // Only the creator can delete their own suggestion, and only if it's still pending
-    if (suggestedBounty.suggestedById !== session.user.id) {
+    if (suggestedBounty.creatorId !== session.user.id) {
       return NextResponse.json(
         { error: 'You can only delete your own suggestions' },
         { status: 403 }

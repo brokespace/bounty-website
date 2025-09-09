@@ -34,6 +34,13 @@ function ProfileContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Client-side validation for new users
+    if (isNewUser && (!formData.walletAddress || formData.walletAddress.trim() === '')) {
+      toast.error('Wallet address is required to complete your profile')
+      return
+    }
+    
     setIsLoading(true)
 
     try {
@@ -42,7 +49,10 @@ function ProfileContent() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          isNewUser
+        }),
       })
 
       const data = await response.json()
@@ -84,6 +94,19 @@ function ProfileContent() {
     }
   }, [status, router])
 
+  // Prevent new users from navigating away without wallet address
+  useEffect(() => {
+    if (isNewUser && (!formData.walletAddress || formData.walletAddress.trim() === '')) {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+
+      window.addEventListener('beforeunload', handleBeforeUnload)
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [isNewUser, formData.walletAddress])
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -105,13 +128,20 @@ function ProfileContent() {
         className="w-full max-w-md"
       >
         <div className="mb-6">
-          <Link 
-            href="/dashboard" 
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to dashboard
-          </Link>
+          {isNewUser && (!formData.walletAddress || formData.walletAddress.trim() === '') ? (
+            <div className="inline-flex items-center gap-2 text-muted-foreground/50 cursor-not-allowed">
+              <ArrowLeft className="h-4 w-4" />
+              Complete profile to continue
+            </div>
+          ) : (
+            <Link 
+              href="/dashboard" 
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to dashboard
+            </Link>
+          )}
         </div>
 
         <Card className="border-muted/50 bg-card/50 backdrop-blur-sm">
@@ -190,9 +220,12 @@ function ProfileContent() {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isLoading}
+                disabled={isLoading || (isNewUser && (!formData.walletAddress || formData.walletAddress.trim() === ''))}
               >
-                {isLoading ? 'Updating...' : 'Update Profile'}
+                {isLoading 
+                  ? (isNewUser ? 'Completing Profile...' : 'Updating...') 
+                  : (isNewUser ? 'Complete Profile & Continue' : 'Update Profile')
+                }
               </Button>
             </form>
           </CardContent>

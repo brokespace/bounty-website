@@ -12,6 +12,7 @@ interface BountyCardProps {
   bounty: {
     id: string
     title: string
+    problem: string
     description: string
     alphaReward: string
     alphaRewardCap: string
@@ -136,6 +137,10 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
               </span>
             </CardTitle>
             
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-2">
+              {bounty.problem}
+            </p>
+            
             <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
               {bounty.description}
             </p>
@@ -180,7 +185,7 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
                   <Trophy className="h-4 w-4 text-accent" />
                   <div>
                     <div className="text-sm font-bold text-gradient">{bounty.winningSpotConfigs?.length || bounty.winningSpots}</div>
-                    <div className="text-xs text-muted-foreground">Winners</div>
+                    <div className="text-xs text-muted-foreground">Possible Winners</div>
                   </div>
                 </motion.div>
               </div>

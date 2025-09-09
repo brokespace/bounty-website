@@ -34,11 +34,11 @@ export function Navigation({ className }: NavigationProps) {
   const navigationItems = [
     { href: '/bounties', label: 'Bounties', icon: Trophy },
     { href: '/network', label: 'Network Status', icon: Activity },
-    { href: '/milestones', label: 'Roadmap', icon: Target },
+    // { href: '/milestones', label: 'Roadmap', icon: Target },
     ...(session?.user?.isAdmin ? [
       { href: '/create', label: 'Create Bounty', icon: Plus },
     ] : []),
-    ...(session && !session.user?.isAdmin ? [{ href: '/suggest-bounty', label: 'Suggest Bounty', icon: Lightbulb }] : []),
+    // ...(session && !session.user?.isAdmin ? [{ href: '/suggest-bounty', label: 'Suggest Bounty', icon: Lightbulb }] : []),
     ...(session ? [{ href: '/dashboard', label: 'Dashboard', icon: User }] : [])
   ]
 
