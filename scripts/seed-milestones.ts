@@ -8,7 +8,7 @@ async function main() {
   const milestones = [
     {
       title: 'Launch Beta Platform',
-      description: 'Complete the initial beta version of BountyHunter with core bounty creation and submission features.',
+      description: 'Complete the initial beta version of AIBoards with core bounty creation and submission features.',
       targetDate: new Date('2025-01-15'),
       completed: true,
       completedAt: new Date('2025-01-10')

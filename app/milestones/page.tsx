@@ -142,7 +142,7 @@ export default function MilestonesPage() {
               Product Roadmap
             </h1>
             <p className="text-lg text-muted-foreground">
-              Track our progress and upcoming features for BountyHunter
+              Track our progress and upcoming features for AIBoards
             </p>
           </div>
 

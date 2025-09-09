@@ -70,7 +70,7 @@ export function Navigation({ className }: NavigationProps) {
                 <div className="absolute inset-0 h-7 w-7 text-primary/20 blur-sm" />
               </div>
               <span className="font-bold text-xl text-primary tracking-tight whitespace-nowrap">
-                BountyHunter
+                AIBoards
               </span>
             </motion.div>
           </Link>

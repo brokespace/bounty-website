@@ -14,7 +14,7 @@ export default function SignUpPage() {
   const handleGoogleSignUp = async () => {
     setIsLoading(true)
     try {
-      await signIn('google', { callbackUrl: '/profile?newUser=true' })
+      await signIn('google')
     } catch (error) {
       console.error('Sign up error:', error)
     } finally {
@@ -46,7 +46,7 @@ export default function SignUpPage() {
               <Wallet className="h-8 w-8 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold">Join BountyHunter</CardTitle>
+              <CardTitle className="text-2xl font-bold">Join AIBoards</CardTitle>
               <CardDescription>
                 Create your account with Google to start earning
               </CardDescription>

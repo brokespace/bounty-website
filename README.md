@@ -1,5 +1,5 @@
 
-# 🎯 BountyHunter - Crypto Bounty Platform
+# 🎯 AIBoards - Crypto Bounty Platform
 
 A comprehensive web application for cryptocurrency bounty management built with Next.js, featuring crypto wallet authentication and alpha token rewards.
 
@@ -196,4 +196,4 @@ This project is available for use and modification as needed.
 
 ---
 
-**BountyHunter** - *Hunt Bounties, Earn Alpha* 🎯
+**AIBoards** - *Hunt Bounties, Earn Alpha* 🎯

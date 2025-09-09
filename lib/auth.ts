@@ -36,6 +36,9 @@ export const authOptions = {
                 isAdmin: false
               }
             })
+            
+            // Mark this as a new user for later redirect
+            user.isNewUser = true
           }
           return true
         } catch (error) {
@@ -52,6 +55,7 @@ export const authOptions = {
         token.isAdmin = user.isAdmin
         token.email = user.email
         token.walletAddress = user.walletAddress
+        token.isNewUser = user.isNewUser
       }
       return token
     },
@@ -80,6 +84,19 @@ export const authOptions = {
         }
       }
       return session
+    },
+    async redirect({ url, baseUrl, token }: any) {
+      // If user is new and doesn't have a wallet, redirect to profile setup
+      if (token?.isNewUser) {
+        return `${baseUrl}/profile?newUser=true`
+      }
+      
+      // If url is provided and relative, use it
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      // If url is from the same host, use it
+      if (new URL(url).origin === baseUrl) return url
+      // Otherwise redirect to bounties
+      return `${baseUrl}/bounties`
     }
   },
   pages: {

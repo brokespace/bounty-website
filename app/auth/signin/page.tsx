@@ -16,7 +16,7 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
-      await signIn('google', { callbackUrl: '/bounties' })
+      await signIn('google')
     } catch (error) {
       console.error('Sign in error:', error)
     } finally {
@@ -32,7 +32,7 @@ export default function SignInPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Navigation />
+        {/* <Navigation /> */}
         <div className="mb-6">
           <Link 
             href="/" 
@@ -49,7 +49,7 @@ export default function SignInPage() {
               <Wallet className="h-8 w-8 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold">Welcome to BountyHunter</CardTitle>
+              <CardTitle className="text-2xl font-bold">Welcome to AIBoards</CardTitle>
               <CardDescription>
                 Sign in with your Google account to get started
               </CardDescription>

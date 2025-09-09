@@ -22,10 +22,10 @@ export function Footer({ className }: FooterProps) {
           {/* Left side - Footer info */}
           <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              {/* Made with <Heart className="h-4 w-4 text-red-500 fill-current" /> by BountyHunter Team */}
+              {/* Made with <Heart className="h-4 w-4 text-red-500 fill-current" /> by AIBoards Team */}
             </div>
             <div className="text-xs">
-              {/* © 2025 BountyHunter. All rights reserved. */}
+              {/* © 2025 AIBoards. All rights reserved. */}
             </div>
           </div>
           

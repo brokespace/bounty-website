@@ -8,7 +8,7 @@ import { Footer } from '@/components/footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'BountyHunter - Crypto Bounty Platform',
+  title: 'AIBoards - Crypto Bounty Platform',
   description: 'Discover and complete crypto bounties with alpha rewards',
   keywords: ['bounty', 'crypto', 'rewards', 'blockchain', 'alpha'],
 }

@@ -7,8 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Wallet, Trophy, Target, Users, ArrowRight, Coins, Shield, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 
 export function HomePageClient() {
+  const { data: session, status } = useSession()
   const [stats, setStats] = useState({
     activeBounties: '0',
     totalRewards: '0',
@@ -65,11 +67,11 @@ export function HomePageClient() {
   }, [])
 
   const features = [
-    {
-      icon: <Wallet className="h-8 w-8" />,
-      title: "Crypto Authentication",
-      description: "Connect with your wallet address and secure password for seamless authentication."
-    },
+    // {
+    //   icon: <Wallet className="h-8 w-8" />,
+    //   title: "Crypto Authentication",
+    //   description: "Connect with your wallet address and secure password for seamless authentication."
+    // },
     {
       icon: <Trophy className="h-8 w-8" />,
       title: "Alpha Rewards", 
@@ -100,8 +102,8 @@ export function HomePageClient() {
   const statsData = [
     { label: "Active Bounties", value: stats.activeBounties, icon: <Trophy className="h-5 w-5" /> },
     { label: "Total Rewards", value: stats.totalRewards, icon: <Coins className="h-5 w-5" /> },
-    { label: "Users", value: stats.totalUsers, icon: <Users className="h-5 w-5" /> },
-    { label: "Success Rate", value: stats.successRate, icon: <Target className="h-5 w-5" /> }
+    // { label: "Users", value: stats.totalUsers, icon: <Users className="h-5 w-5" /> },
+    // { label: "Success Rate", value: stats.successRate, icon: <Target className="h-5 w-5" /> }
   ]
 
   return (
@@ -154,16 +156,18 @@ export function HomePageClient() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-6 justify-center pt-8"
           >
-            <Link href="/auth/signup">
-              <Button 
-                size="lg" 
-                className="group relative overflow-hidden bg-gradient-to-r from-primary via-blue-600 to-accent hover:from-primary/90 hover:via-blue-700 hover:to-accent/90 text-white text-lg px-10 py-7 shadow-2xl shadow-primary/25 hover:shadow-primary/40 transform hover:scale-105 transition-all duration-300 border border-primary/50 animate-glow"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <span className="relative z-10">Start Hunting</span>
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
-              </Button>
-            </Link>
+            {!session && (
+              <Link href="/auth/signup">
+                <Button 
+                  size="lg" 
+                  className="group relative overflow-hidden bg-gradient-to-r from-primary via-blue-600 to-accent hover:from-primary/90 hover:via-blue-700 hover:to-accent/90 text-white text-lg px-10 py-7 shadow-2xl shadow-primary/25 hover:shadow-primary/40 transform hover:scale-105 transition-all duration-300 border border-primary/50 animate-glow"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="relative z-10">Start Hunting</span>
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+                </Button>
+              </Link>
+            )}
             
             <Link href="/bounties">
               <Button 
@@ -304,7 +308,7 @@ export function HomePageClient() {
             </CardHeader>
             <CardContent className="relative z-10">
               <p className="text-muted-foreground mb-4">
-                Code challenges, smart contract development, web3 integrations, and technical implementations.
+                Code challenges, smart contract development, web3 integrations, and technical implementations in the world of AI.
               </p>
               <div className="flex flex-wrap gap-2">
                 {["Frontend", "Smart Contracts", "APIs", "Web3", "DeFi"].map((tag, i) => (
@@ -334,7 +338,7 @@ export function HomePageClient() {
             </CardHeader>
             <CardContent className="relative z-10">
               <p className="text-muted-foreground mb-4">
-                Design challenges, content creation, marketing materials, and creative digital assets.
+                Design challenges, content creation, marketing materials, and creative digital assets in the world of AI.
               </p>
               <div className="flex flex-wrap gap-2">
                 {["Design", "Content", "Graphics", "Video", "Marketing"].map((tag, i) => (
@@ -403,7 +407,7 @@ export function HomePageClient() {
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Why Choose{' '}
             <span className="text-gradient animate-gradient bg-gradient-to-r from-primary via-accent to-purple bg-clip-text text-transparent">
-              BountyHunter
+              AIBoards
             </span>
             ?
           </h2>
@@ -480,7 +484,7 @@ export function HomePageClient() {
                 </h2>
                 <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
                   Join thousands of bounty users earning{' '}
-                  <span className="text-accent font-semibold">alpha rewards</span>. 
+                  <span className="text-accent font-semibold">rewards</span>. 
                   Create your account with just your wallet address.
                 </p>
               </motion.div>
@@ -491,18 +495,20 @@ export function HomePageClient() {
                 transition={{ delay: 2.4, duration: 0.6 }}
                 className="flex flex-col sm:flex-row gap-6 justify-center"
               >
-                <Link href="/auth/signup">
-                  <Button 
-                    size="lg" 
-                    className="group relative overflow-hidden bg-gradient-to-r from-primary via-blue-600 to-accent hover:from-primary/90 hover:via-blue-700 hover:to-accent/90 text-white text-xl px-12 py-8 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transform hover:scale-110 transition-all duration-300 border border-primary/50 animate-glow"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <span className="relative z-10 flex items-center">
-                      <Wallet className="mr-3 h-6 w-6 group-hover:rotate-12 transition-transform duration-200" />
-                      Sign Up Now
-                    </span>
-                  </Button>
-                </Link>
+                {!session && (
+                  <Link href="/auth/signup">
+                    <Button 
+                      size="lg" 
+                      className="group relative overflow-hidden bg-gradient-to-r from-primary via-blue-600 to-accent hover:from-primary/90 hover:via-blue-700 hover:to-accent/90 text-white text-xl px-12 py-8 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transform hover:scale-110 transition-all duration-300 border border-primary/50 animate-glow"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <span className="relative z-10 flex items-center">
+                        <Wallet className="mr-3 h-6 w-6 group-hover:rotate-12 transition-transform duration-200" />
+                        Sign Up Now
+                      </span>
+                    </Button>
+                  </Link>
+                )}
                 
                 <Link href="/bounties">
                   <Button 
@@ -520,7 +526,7 @@ export function HomePageClient() {
       </section>
 
       {/* Team Rizzo Section */}
-      <section className="container mx-auto max-w-6xl px-4 py-20">
+      {/* <section className="container mx-auto max-w-6xl px-4 py-20">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -619,7 +625,7 @@ export function HomePageClient() {
             </div>
           </motion.div>
         </motion.div>
-      </section>
+      </section> */}
 
       {/* Footer */}
       <footer className="relative border-t border-primary/30 bg-card backdrop-blur-sm">
@@ -635,7 +641,7 @@ export function HomePageClient() {
                 <Wallet className="h-6 w-6 text-primary animate-pulse-slow" />
               </div>
               <span className="font-bold text-2xl text-gradient bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                BountyHunter
+                AIBoards
               </span>
             </motion.div>
             
@@ -646,12 +652,12 @@ export function HomePageClient() {
               >
                 Bounties
               </Link>
-              <Link 
+              {/* <Link 
                 href="/create" 
                 className="hover:text-accent transition-all duration-300 hover:scale-110 font-medium"
               >
                 Create
-              </Link>
+              </Link> */}
               <motion.div 
                 className="text-sm opacity-60"
                 whileHover={{ opacity: 100, scale: 1.05 }}

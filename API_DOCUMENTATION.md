@@ -1,7 +1,7 @@
 
-# BountyHunter API Documentation
+# AIBoards API Documentation
 
-This document outlines all the backend API routes implemented in the BountyHunter application.
+This document outlines all the backend API routes implemented in the AIBoards application.
 
 ## Authentication Routes
 

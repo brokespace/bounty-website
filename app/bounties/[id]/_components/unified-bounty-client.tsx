@@ -41,10 +41,12 @@ import {
   Key,
   ChevronDown,
   ArrowRight,
-  FileStack
+  FileStack,
+  DollarSign
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { getSweRizzoPrice, formatUSDPrice } from '@/lib/coingecko'
 
 interface UnifiedBountyClientProps {
   bounty: any
@@ -68,6 +70,8 @@ export function UnifiedBountyClient({
   const [userSubmissions, setUserSubmissions] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState('information')
   const [requirementsOpen, setRequirementsOpen] = useState(false)
+  const [usdPrice, setUsdPrice] = useState<number>(0)
+  const [isLoadingPrice, setIsLoadingPrice] = useState(true)
 
   const [submissionForm, setSubmissionForm] = useState({
     title: '',
@@ -99,6 +103,22 @@ export function UnifiedBountyClient({
       console.log(`${files.length} files ready for upload when submission is created`)
     }
   }
+
+  // Fetch USD price
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const price = await getSweRizzoPrice()
+        setUsdPrice(price)
+      } catch (error) {
+        console.error('Failed to fetch SWE-RIZZO price:', error)
+      } finally {
+        setIsLoadingPrice(false)
+      }
+    }
+
+    fetchPrice()
+  }, [])
 
   // Fetch bounty data and submissions
   useEffect(() => {
@@ -824,10 +844,18 @@ export function UnifiedBountyClient({
 
                                 {/* Right side - Reward */}
                                 <div className="text-right">
-                                  <div className="flex items-center gap-1">
-                                    <Coins className="h-4 w-4 text-yellow-600" />
-                                    <span className={`font-bold ${styles.textColor}`}>{spot.reward}</span>
-                                    <span className={`text-sm ${styles.textColor} opacity-70`}>α</span>
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-1 justify-end">
+                                      <Coins className="h-4 w-4 text-yellow-600" />
+                                      <span className={`font-bold ${styles.textColor}`}>{spot.reward}</span>
+                                      <span className={`text-sm ${styles.textColor} opacity-70`}>α</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 justify-end">
+                                      <DollarSign className="h-3 w-3 text-green-500" />
+                                      <span className="text-xs font-medium text-green-600">
+                                        {isLoadingPrice ? '...' : formatUSDPrice(spot.reward, usdPrice)}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -841,11 +869,21 @@ export function UnifiedBountyClient({
                           )}
                         </div>
                       ) : currentBounty?.winningSpotConfigs && currentBounty.winningSpotConfigs.length === 1 ? (
-                        <div className="text-center">
+                        <div className="text-center space-y-3">
                           <div className="flex items-center justify-center gap-2 mb-2">
                             <Coins className="h-6 w-6 text-yellow-600" />
                             <div className="text-2xl font-bold text-gray-200">
                               {currentBounty.winningSpotConfigs[0]?.reward || currentBounty?.alphaReward || '0'} α
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-center gap-2">
+                            <DollarSign className="h-5 w-5 text-green-500" />
+                            <div className="text-lg font-bold text-green-600">
+                              {isLoadingPrice ? (
+                                <span className="animate-pulse">Loading...</span>
+                              ) : (
+                                formatUSDPrice(currentBounty.winningSpotConfigs[0]?.reward || currentBounty?.alphaReward || '0', usdPrice)
+                              )}
                             </div>
                           </div>
                           <div className="text-sm text-gray-500">
@@ -853,11 +891,21 @@ export function UnifiedBountyClient({
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center">
+                        <div className="text-center space-y-3">
                           <div className="flex items-center justify-center gap-2 mb-2">
                             <Coins className="h-6 w-6 text-yellow-600" />
                             <div className="text-2xl font-bold text-gray-200">
                               {currentBounty?.alphaReward || '0'} α
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-center gap-2">
+                            <DollarSign className="h-5 w-5 text-green-500" />
+                            <div className="text-lg font-bold text-green-600">
+                              {isLoadingPrice ? (
+                                <span className="animate-pulse">Loading...</span>
+                              ) : (
+                                formatUSDPrice(currentBounty?.alphaReward || '0', usdPrice)
+                              )}
                             </div>
                           </div>
                           <div className="text-sm text-gray-500">

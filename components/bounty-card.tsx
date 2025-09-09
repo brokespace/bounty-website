@@ -5,8 +5,10 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, Trophy, Users, Coins, Medal, Key, User, ArrowRight } from 'lucide-react'
+import { Calendar, Clock, Trophy, Users, Coins, Medal, Key, User, ArrowRight, DollarSign } from 'lucide-react'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { getSweRizzoPrice, formatUSDPrice } from '@/lib/coingecko'
 
 interface BountyCardProps {
   bounty: {
@@ -42,6 +44,23 @@ interface BountyCardProps {
 }
 
 export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
+  const [usdPrice, setUsdPrice] = useState<number>(0)
+  const [isLoadingPrice, setIsLoadingPrice] = useState(true)
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const price = await getSweRizzoPrice()
+        setUsdPrice(price)
+      } catch (error) {
+        console.error('Failed to fetch SWE-RIZZO price:', error)
+      } finally {
+        setIsLoadingPrice(false)
+      }
+    }
+
+    fetchPrice()
+  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -157,9 +176,23 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
                   </div>
                   <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-2 p-3 glass-effect border border-primary/20 rounded-lg">
                     <Coins className="h-5 w-5 text-yellow-500" />
-                    <div>
+                    <div className="flex-1">
                       <div className="font-bold text-lg">{bounty.alphaReward} α</div>
                       <div className="text-xs text-muted-foreground">Total Alpha Reward</div>
+                    </div>
+                  </motion.div>
+                  {/* USD Price Display */}
+                  <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-2 p-3 glass-effect border border-green-500/20 rounded-lg bg-green-500/5">
+                    <DollarSign className="h-5 w-5 text-green-500" />
+                    <div className="flex-1">
+                      <div className="font-bold text-lg text-green-600">
+                        {isLoadingPrice ? (
+                          <span className="animate-pulse">Loading...</span>
+                        ) : (
+                          formatUSDPrice(bounty.alphaReward, usdPrice)
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">USD Value</div>
                     </div>
                   </motion.div>
                 </div>

@@ -263,7 +263,7 @@ export function NetworkClient() {
                       </CardTitle>
                       
                       <p className="text-sm text-muted-foreground font-mono">
-                        {screener.hotkey}
+                        {/* {screener.id} */}
                       </p>
                     </CardHeader>
                     
