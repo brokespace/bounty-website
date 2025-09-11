@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -9,6 +10,7 @@ import { Wallet, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default function SignUpPage() {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleGoogleSignUp = async () => {
@@ -31,13 +33,13 @@ export default function SignUpPage() {
         className="w-full max-w-md"
       >
         <div className="mb-6">
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          <button 
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to home
-          </Link>
+            Back
+          </button>
         </div>
 
         <Card className="border-muted/50 bg-card/50 backdrop-blur-sm">

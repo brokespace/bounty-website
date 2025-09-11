@@ -201,13 +201,13 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <Link 
-          href="/dashboard" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        <button 
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
+          Back
+        </button>
       </div>
 
       <div className="text-center">

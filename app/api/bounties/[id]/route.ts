@@ -61,8 +61,8 @@ export async function GET(
       )
     }
 
-    const totalReward = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.reward.toString()), 0)
-    const totalRewardCap = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.rewardCap.toString()), 0)
+    const totalReward = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => sum + parseFloat(spot.reward.toString()), 0)
+    const totalRewardCap = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => sum + parseFloat(spot.rewardCap.toString()), 0)
     
     const formattedBounty = {
       ...bounty,
@@ -171,8 +171,8 @@ export async function PUT(
       }
     })
 
-    const totalReward = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.reward.toString()), 0)
-    const totalRewardCap = bounty.winningSpotConfigs.reduce((sum, spot) => sum + parseFloat(spot.rewardCap.toString()), 0)
+    const totalReward = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => sum + parseFloat(spot.reward.toString()), 0)
+    const totalRewardCap = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => sum + parseFloat(spot.rewardCap.toString()), 0)
 
     return NextResponse.json({
       message: 'Bounty updated successfully',

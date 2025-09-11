@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -34,6 +35,7 @@ interface Milestone {
 }
 
 export default function MilestonesPage() {
+  const router = useRouter()
   const { data: session } = useSession()
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -122,13 +124,13 @@ export default function MilestonesPage() {
     <div className="container mx-auto max-w-6xl p-6 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        <button 
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to home
-        </Link>
+          Back
+        </button>
       </div>
 
       <motion.div

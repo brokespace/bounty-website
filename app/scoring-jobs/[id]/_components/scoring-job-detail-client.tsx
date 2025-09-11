@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,6 +44,7 @@ export function ScoringJobDetailClient({
   isSubmitter, 
   isBountyCreator 
 }: ScoringJobDetailClientProps) {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [currentScoringJob, setCurrentScoringJob] = useState(scoringJob)
 
@@ -97,13 +99,13 @@ export function ScoringJobDetailClient({
         transition={{ duration: 0.6 }}
         className="flex items-center justify-between mb-8"
       >
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 px-6 py-3 glass-effect hover:glow-border border border-primary/30 hover:border-primary/60 text-primary hover:text-accent transition-all duration-300 rounded-xl group transform hover:scale-105 shadow-lg shadow-primary/10"
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 px-6 py-3 glass-effect hover:glow-border border border-primary/30 hover:border-primary/60 text-primary hover:text-accent transition-all duration-300 rounded-xl group transform hover:scale-105 shadow-lg shadow-primary/10 bg-transparent cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-200" />
-          <span className="font-medium text-gradient">Back to Dashboard</span>
-        </Link>
+          <span className="font-medium text-gradient">Back</span>
+        </button>
         
       </motion.div>
 

@@ -129,10 +129,10 @@ export async function GET(req: NextRequest) {
 
     // Format data
     const formattedBounties = userBounties.map(bounty => {
-      const totalReward = bounty.winningSpotConfigs.reduce((sum, spot) => 
+      const totalReward = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => 
         sum + parseFloat(spot.reward.toString()), 0
       )
-      const totalRewardCap = bounty.winningSpotConfigs.reduce((sum, spot) => 
+      const totalRewardCap = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => 
         sum + parseFloat(spot.rewardCap.toString()), 0
       )
       

@@ -663,7 +663,7 @@ export function HomePageClient() {
                 whileHover={{ opacity: 100, scale: 1.05 }}
                 transition={{ duration: 0.2 }}
               >
-                ⚓ Crafted by Team Rizzo ⚓
+                Crafted by Team Rizzo 
               </motion.div>
             </div>
           </div>
