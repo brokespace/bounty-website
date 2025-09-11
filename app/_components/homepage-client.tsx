@@ -75,7 +75,7 @@ export function HomePageClient() {
     {
       icon: <Trophy className="h-8 w-8" />,
       title: "Alpha Rewards", 
-      description: "Earn alpha cryptocurrency rewards for completing bounties. Choose 60% at once or 100% over time."
+      description: "Earn rewards by completing bounties."
     },
     {
       icon: <Target className="h-8 w-8" />,
@@ -87,16 +87,16 @@ export function HomePageClient() {
       title: "Validation System",
       description: "Automated and manual validation ensures quality submissions and fair reward distribution."
     },
-    {
-      icon: <Zap className="h-8 w-8" />,
-      title: "File Upload",
-      description: "Drag & drop file uploads with no limitations. Upload folders, code, documents, and more."
-    },
-    {
-      icon: <Users className="h-8 w-8" />,
-      title: "Community Driven",
-      description: "Vote on submissions and participate in the bounty hunter community ecosystem."
-    }
+    // {
+    //   icon: <Zap className="h-8 w-8" />,
+    //   title: "File Upload",
+    //   description: "Drag & drop file uploads with no limitations. Upload folders, code, documents, and more."
+    // },
+    // {
+    //   icon: <Users className="h-8 w-8" />,
+    //   title: "Community Driven",
+    //   description: "Vote on submissions and participate in the bounty hunter community ecosystem."
+    // }
   ]
 
   const statsData = [
@@ -133,7 +133,7 @@ export function HomePageClient() {
           >
             Hunt Bounties,{' '}
             <span className="text-gradient animate-gradient bg-gradient-to-r from-primary via-accent to-purple bg-clip-text text-transparent">
-              Earn Alpha
+              Earn Rewards
             </span>
           </motion.h1>
           
@@ -146,7 +146,7 @@ export function HomePageClient() {
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-purple/20 blur-2xl animate-pulse-slow -z-10 rounded-full" />
             <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed relative z-10">
               Join the premier crypto bounty platform where developers and creators 
-              earn <span className="text-accent font-semibold">alpha rewards</span> for completing innovative challenges.
+              earn <span className="text-accent font-semibold">rewards</span> for completing innovative challenges.
             </p>
           </motion.div>
           
@@ -207,7 +207,7 @@ export function HomePageClient() {
             {
               step: "01",
               title: "Create & Post",
-              description: "Creators post bounties with detailed requirements, deadlines, and alpha reward amounts. Set multiple winner spots and validation criteria.",
+              description: "COMING SOON: Creators post bounties with detailed requirements, deadlines, and reward amounts. Set multiple winner spots and validation criteria.",
               icon: "📝",
               gradient: "from-primary to-blue-600"
             },
@@ -221,7 +221,7 @@ export function HomePageClient() {
             {
               step: "03",
               title: "Earn",
-              description: "Automated and community validation determines winners. Earn 60% alpha instantly or 100% over time with our unique reward system.",
+              description: "Automated and community validation determines winners.",
               icon: "💰",
               gradient: "from-purple to-pink-500"
             }
@@ -358,7 +358,7 @@ export function HomePageClient() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="grid grid-cols-2 md:grid-cols-2 gap-8"
         >
           {statsData.map((stat, index) => (
             <motion.div

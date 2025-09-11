@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { BountyCard } from '@/components/bounty-card'
-import { Search, Filter, X, SlidersHorizontal, Trophy, Target, Sparkles } from 'lucide-react'
+import { Search, Filter, X, SlidersHorizontal, Trophy, Target, Sparkles, DollarSign } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getSweRizzoPrice, formatUSDPrice } from '@/lib/coingecko'
 
 interface BountiesClientProps {
   initialBounties: any[]
@@ -30,6 +31,8 @@ export function BountiesClient({ initialBounties, totalRewards }: BountiesClient
   const [sortBy, setSortBy] = useState('createdAt')
   const [isLoading, setIsLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
+  const [usdPrice, setUsdPrice] = useState<number>(0)
+  const [isLoadingPrice, setIsLoadingPrice] = useState(true)
   
   const filtersRef = useRef(null)
   const gridRef = useRef(null)
@@ -58,6 +61,22 @@ export function BountiesClient({ initialBounties, totalRewards }: BountiesClient
     
     fetchBounties()
   }, [initialBounties])
+
+  // Fetch USD price on mount
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const price = await getSweRizzoPrice()
+        setUsdPrice(price)
+      } catch (error) {
+        console.error('Failed to fetch SWE-RIZZO price:', error)
+      } finally {
+        setIsLoadingPrice(false)
+      }
+    }
+
+    fetchPrice()
+  }, [])
 
   // Apply filters
   useEffect(() => {
@@ -176,8 +195,14 @@ export function BountiesClient({ initialBounties, totalRewards }: BountiesClient
             whileHover={{ scale: 1.05, y: -2 }}
             className="flex items-center gap-2 px-4 py-2 glass-effect border border-accent/30 rounded-full"
           >
-            <Sparkles className="h-4 w-4 text-accent" />
-            <span className="text-sm font-medium text-gradient">{parseFloat(totalRewards).toFixed(2)} α Total Rewards</span>
+            <DollarSign className="h-4 w-4 text-accent" />
+            <span className="text-sm font-medium text-gradient">
+              {isLoadingPrice ? (
+                <span className="animate-pulse">Loading...</span>
+              ) : (
+                formatUSDPrice(totalRewards, usdPrice)
+              )} Total Rewards
+            </span>
           </motion.div>
         </motion.div>
       </motion.div>
