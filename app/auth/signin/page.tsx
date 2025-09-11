@@ -1,9 +1,9 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Navigation } from '@/components/navigation'
@@ -13,7 +13,14 @@ import Link from 'next/link'
 
 export default function SignInPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      router.push('/bounties')
+    }
+  }, [status, session, router])
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
@@ -24,6 +31,17 @@ export default function SignInPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
