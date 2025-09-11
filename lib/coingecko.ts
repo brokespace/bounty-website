@@ -62,21 +62,21 @@ export async function getSweRizzoPrice(): Promise<number> {
 export function formatUSDPrice(alphaAmount: string | number, usdPrice: number): string {
   const alpha = typeof alphaAmount === 'string' ? parseFloat(alphaAmount) : alphaAmount
   if (isNaN(alpha) || usdPrice === 0) {
-    return '$0.00'
+    return '0.00'
   }
   
   const usdValue = alpha * usdPrice
   
   // Format based on value size
   if (usdValue < 0.01) {
-    return '<$0.01'
+    return '<0.01'
   } else if (usdValue < 1) {
-    return `$${usdValue.toFixed(3)}`
+    return `${usdValue.toFixed(3)}`
   } else if (usdValue < 1000) {
-    return `$${usdValue.toFixed(2)}`
+    return `${usdValue.toFixed(2)}`
   } else if (usdValue < 1000000) {
-    return `$${(usdValue / 1000).toFixed(1)}K`
+    return `${(usdValue / 1000).toFixed(1)}K`
   } else {
-    return `$${(usdValue / 1000000).toFixed(1)}M`
+    return `${(usdValue / 1000000).toFixed(1)}M`
   }
 }

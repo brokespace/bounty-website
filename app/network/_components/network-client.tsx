@@ -53,11 +53,11 @@ export function NetworkClient() {
 
         const data = await response.json()
         
-        // Filter out offline/inactive screeners
-        const activeScreeners = data.filter((s: ScreenerWithSupport) => s.isActive)
-        setScreeners(activeScreeners)
+        // Show all screeners (active and inactive)
+        setScreeners(data)
         
-        // Calculate stats only for active screeners
+        // Calculate stats for active screeners only
+        const activeScreeners = data.filter((s: ScreenerWithSupport) => s.isActive)
         const available = activeScreeners.filter((s: ScreenerWithSupport) => s.currentJobs < s.maxConcurrent).length
         const busy = activeScreeners.filter((s: ScreenerWithSupport) => s.currentJobs >= s.maxConcurrent).length
         
@@ -81,6 +81,7 @@ export function NetworkClient() {
   }, [])
 
   const getScreenerStatus = (screener: ScreenerWithSupport) => {
+    if (!screener.isActive) return { text: 'Inactive', color: 'bg-gray-500', variant: 'secondary' as const }
     if (screener.currentJobs >= screener.maxConcurrent) return { text: 'Busy', color: 'bg-red-500', variant: 'destructive' as const }
     if (screener.currentJobs > 0) return { text: 'Scoring', color: 'bg-yellow-500', variant: 'default' as const }
     return { text: 'Available for work', color: 'bg-green-500', variant: 'default' as const }
@@ -243,14 +244,18 @@ export function NetworkClient() {
                   whileHover={{ y: -8, scale: 1.03 }}
                   className="group h-full"
                 >
-                  <Card className="card-enhanced relative overflow-hidden border border-primary/30 hover:border-primary/50 bg-card h-full">
+                  <Card className={`card-enhanced relative overflow-hidden border border-primary/30 hover:border-primary/50 bg-card h-full ${!screener.isActive ? 'opacity-60' : ''}`}>
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/8 to-purple/8 opacity-0 group-hover:opacity-100 transition-all duration-500" />
                     <div className="absolute -top-40 -right-40 w-40 h-40 bg-gradient-to-br from-accent/20 to-purple/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
                     
                     <CardHeader className="relative z-10 text-center">
                       <div className="flex items-center justify-center mb-4">
                         <motion.div 
-                          className="text-primary p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 w-fit group-hover:from-primary/20 group-hover:to-accent/20 transition-all duration-300"
+                          className={`p-4 rounded-2xl w-fit transition-all duration-300 ${
+                            !screener.isActive 
+                              ? 'text-gray-500 bg-gradient-to-br from-gray-500/10 to-gray-400/10' 
+                              : 'text-primary bg-gradient-to-br from-primary/10 to-accent/10 group-hover:from-primary/20 group-hover:to-accent/20'
+                          }`}
                           whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
                           transition={{ duration: 0.4 }}
                         >
@@ -284,7 +289,7 @@ export function NetworkClient() {
                             />
                             {/* Progress circle */}
                             <motion.path
-                              className={screener.currentJobs >= screener.maxConcurrent ? "text-red-500" : screener.currentJobs > 0 ? "text-yellow-500" : "text-green-500"}
+                              className={!screener.isActive ? "text-gray-500" : screener.currentJobs >= screener.maxConcurrent ? "text-red-500" : screener.currentJobs > 0 ? "text-yellow-500" : "text-green-500"}
                               stroke="currentColor"
                               strokeWidth="2"
                               fill="transparent"
