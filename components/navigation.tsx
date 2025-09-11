@@ -16,6 +16,7 @@ import {
 import { useSession, signOut } from 'next-auth/react'
 import { Wallet, Plus, Trophy, User, LogOut, Menu, X, Lightbulb, Settings, Target, Activity } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 interface NavigationProps {
@@ -66,8 +67,13 @@ export function Navigation({ className }: NavigationProps) {
               className="flex items-center gap-2"
             >
               <div className="relative">
-                <Wallet className="h-7 w-7 text-primary drop-shadow-sm" />
-                <div className="absolute inset-0 h-7 w-7 text-primary/20 blur-sm" />
+                <Image 
+                  src="/favicon.png" 
+                  alt="AIBoards Logo" 
+                  width={28} 
+                  height={28} 
+                  className="drop-shadow-sm"
+                />
               </div>
               <span className="font-bold text-xl text-primary tracking-tight whitespace-nowrap">
                 AIBoards
