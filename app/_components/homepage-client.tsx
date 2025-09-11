@@ -4,10 +4,11 @@
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Wallet, Trophy, Target, Users, ArrowRight, Coins, Shield, Zap } from 'lucide-react'
+import { Wallet, Trophy, Target, Users, ArrowRight, Coins, Shield, Zap, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import { getSweRizzoPrice, formatUSDPrice } from '@/lib/coingecko'
 
 export function HomePageClient() {
   const { data: session, status } = useSession()
@@ -19,6 +20,8 @@ export function HomePageClient() {
   })
   
   const [loading, setLoading] = useState(true)
+  const [usdPrice, setUsdPrice] = useState<number>(0)
+  const [isLoadingPrice, setIsLoadingPrice] = useState(true)
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -66,6 +69,22 @@ export function HomePageClient() {
     fetchStats()
   }, [])
 
+  // Fetch USD price
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const price = await getSweRizzoPrice()
+        setUsdPrice(price)
+      } catch (error) {
+        console.error('Failed to fetch SWE-RIZZO price:', error)
+      } finally {
+        setIsLoadingPrice(false)
+      }
+    }
+
+    fetchPrice()
+  }, [])
+
   const features = [
     // {
     //   icon: <Wallet className="h-8 w-8" />,
@@ -101,7 +120,12 @@ export function HomePageClient() {
 
   const statsData = [
     { label: "Active Bounties", value: stats.activeBounties, icon: <Trophy className="h-5 w-5" /> },
-    { label: "Total Rewards", value: stats.totalRewards, icon: <Coins className="h-5 w-5" /> },
+    { 
+      label: "Total Rewards", 
+      value: stats.totalRewards, 
+      usdValue: stats.totalRewards !== '0' ? formatUSDPrice(stats.totalRewards.replace(/[^\d.]/g, ''), usdPrice).replace('$', '') : '0.00',
+      icon: <Coins className="h-5 w-5" /> 
+    },
     // { label: "Users", value: stats.totalUsers, icon: <Users className="h-5 w-5" /> },
     // { label: "Success Rate", value: stats.successRate, icon: <Target className="h-5 w-5" /> }
   ]
@@ -371,7 +395,7 @@ export function HomePageClient() {
             >
               <Card className="card-enhanced text-center relative overflow-hidden border border-primary/30 hover:border-primary/50 bg-card">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/8 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <CardContent className="pt-8 pb-6 relative z-10">
+                <CardContent className="pt-6 pb-6 relative z-10">
                   <motion.div 
                     className="flex items-center justify-center mb-4"
                     whileHover={{ rotate: 360 }}
@@ -381,13 +405,31 @@ export function HomePageClient() {
                       {stat.icon}
                     </div>
                   </motion.div>
-                  <div className="text-3xl font-bold mb-2 text-gradient animate-gradient bg-gradient-to-r from-primary to-accent bg-clip-text">
-                    {loading ? (
-                      <div className="animate-pulse bg-primary/20 h-8 w-16 rounded"></div>
-                    ) : (
-                      stat.value
-                    )}
-                  </div>
+                  <div className="space-y-2 mb-3">
+                    {/* Main value */}
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="text-3xl font-bold text-gradient animate-gradient bg-gradient-to-r from-primary to-accent bg-clip-text">
+                        {loading ? (
+                          <div className="animate-pulse bg-primary/20 h-8 w-16 rounded"></div>
+                        ) : (
+                          stat.value
+                        )}
+                      </div>
+                      {/* Show USD value for Total Rewards */}
+                      {stat.usdValue && (
+                        <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20">
+                          <DollarSign className="h-4 w-4 text-green-500" />
+                          <span className="text-sm font-medium text-green-600">
+                            {isLoadingPrice ? (
+                              <span className="animate-pulse">Loading...</span>
+                            ) : (
+                              stat.usdValue
+                            )}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    </div>
                   <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
                 </CardContent>
               </Card>
