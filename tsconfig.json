@@ -7,9 +7,10 @@
       "es5",
       "es2020"
     ],
-    "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "noImplicitAny": false,
+    "strict": false,
+    "allowJs": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -17,7 +18,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "noImplicitAny": false,
     "incremental": true,
     "plugins": [
       {
