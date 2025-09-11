@@ -45,7 +45,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const uploadedFiles = []
+    const uploadedFiles: Array<{
+      id: string;
+      submissionId: string;
+      originalName: string;
+      filename: string;
+      filepath: string;
+      mimeType: string;
+      fileType: string;
+      uploadedAt: Date;
+      filesize: string;
+    }> = []
 
     for (const file of files) {
       if (file.size === 0) continue
