@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
       skip: offset
     })
 
-    const formattedBounties = bounties.map(bounty => {
+    const formattedBounties = bounties.map((bounty: any) => {
       const totalReward = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => sum + parseFloat(spot.reward.toString()), 0)
       const totalRewardCap = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => sum + parseFloat(spot.rewardCap.toString()), 0)
       
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
         alphaReward: totalReward.toString(),
         alphaRewardCap: totalRewardCap.toString(),
         submissionCount: bounty._count.submissions,
-        winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
+        winningSpotConfigs: bounty.winningSpotConfigs.map((spot: any) => ({
           ...spot,
           reward: spot.reward.toString(),
           rewardCap: spot.rewardCap.toString()

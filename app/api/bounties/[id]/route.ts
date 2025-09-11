@@ -68,7 +68,7 @@ export async function GET(
       ...bounty,
       alphaReward: totalReward.toString(),
       alphaRewardCap: totalRewardCap.toString(),
-      winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
+      winningSpotConfigs: bounty.winningSpotConfigs.map((spot: any) => ({
         ...spot,
         reward: spot.reward.toString(),
         rewardCap: spot.rewardCap.toString()
@@ -180,7 +180,7 @@ export async function PUT(
         ...bounty,
         alphaReward: totalReward.toString(),
         alphaRewardCap: totalRewardCap.toString(),
-        winningSpotConfigs: bounty.winningSpotConfigs.map(spot => ({
+        winningSpotConfigs: bounty.winningSpotConfigs.map((spot: any) => ({
           ...spot,
           reward: spot.reward.toString(),
           rewardCap: spot.rewardCap.toString()
