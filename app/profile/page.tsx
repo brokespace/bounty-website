@@ -255,6 +255,9 @@ function ProfileContent() {
                 <p className="text-xs text-muted-foreground">
                   Select the network your wallet address belongs to
                 </p>
+                <p className="text-xs text-yellow-600 mt-1">
+                  Note: If you select Bitcoin or Ethereum, network fees will be deducted from your payout.
+                </p>
               </div>
 
 
