@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { User, Wallet, ArrowLeft, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -19,7 +20,8 @@ function ProfileContent() {
   const isNewUser = searchParams.get('newUser') === 'true'
   const [formData, setFormData] = useState({
     username: '',
-    walletAddress: ''
+    walletAddress: '',
+    walletNetwork: ''
   })
   const [showTOSWarning, setShowTOSWarning] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -28,7 +30,8 @@ function ProfileContent() {
     if (session?.user) {
       setFormData({
         username: session.user.username || '',
-        walletAddress: session.user.walletAddress || ''
+        walletAddress: session.user.walletAddress || '',
+        walletNetwork: session.user.walletNetwork || ''
       })
       // Check if user hasn't accepted TOS and show warning
       if (session.user.acceptedTos === false) {
@@ -97,6 +100,13 @@ function ProfileContent() {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
+    }))
+  }
+
+  const handleNetworkChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      walletNetwork: value
     }))
   }
 
@@ -228,6 +238,23 @@ function ProfileContent() {
                     Your wallet address is required to receive bounty rewards
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="walletNetwork">Wallet Network</Label>
+                <Select value={formData.walletNetwork} onValueChange={handleNetworkChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select wallet network" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
+                    <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
+                    <SelectItem value="TAO">Bittensor (TAO)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Select the network your wallet address belongs to
+                </p>
               </div>
 
 

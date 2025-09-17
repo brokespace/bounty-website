@@ -4,6 +4,7 @@ export interface User {
   username: string | null
   email?: string | null
   walletAddress?: string | null
+  walletNetwork?: 'BTC' | 'ETH' | 'TAO' | null
   image?: string | null
   isActive?: boolean
   isAdmin?: boolean
@@ -86,6 +87,7 @@ declare module "next-auth" {
       username: string | null
       email?: string | null
       walletAddress?: string | null
+      walletNetwork?: 'BTC' | 'ETH' | 'TAO' | null
       image?: string | null
       isActive?: boolean
       isAdmin?: boolean
@@ -99,6 +101,7 @@ declare module "next-auth" {
     username: string | null
     email?: string | null
     walletAddress?: string | null
+    walletNetwork?: 'BTC' | 'ETH' | 'TAO' | null
     isActive?: boolean
     isAdmin?: boolean
     acceptedTos?: boolean
@@ -143,6 +146,7 @@ declare module "next-auth/jwt" {
     username: string | null
     email?: string | null
     walletAddress?: string | null
+    walletNetwork?: 'BTC' | 'ETH' | 'TAO' | null
     isActive?: boolean
     isAdmin?: boolean
     acceptedTos?: boolean

@@ -41,6 +41,7 @@ model User {
   username          String?           @unique
   email             String?           @unique
   walletAddress     String?
+  walletNetwork     WalletNetwork?
   password          String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -426,4 +427,10 @@ enum WalletChangeType {
   ADDED      // First time setting a wallet
   UPDATED    // Changing from one wallet to another
   REMOVED    // Removing wallet address
+}
+
+enum WalletNetwork {
+  BTC        // Bitcoin network
+  ETH        // Ethereum network
+  TAO        // Tao network
 }

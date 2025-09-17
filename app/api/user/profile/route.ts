@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 const updateProfileSchema = z.object({
   username: z.string().min(3).max(50).optional(),
   walletAddress: z.string().optional(),
+  walletNetwork: z.enum(['BTC', 'ETH', 'TAO']).optional(),
   isNewUser: z.boolean().optional(),
 })
 
@@ -46,13 +47,15 @@ export async function PUT(request: NextRequest) {
       where: { id: session.user.id },
       data: {
         ...(validatedData.username && { username: validatedData.username }),
-        ...(validatedData.walletAddress && { walletAddress: validatedData.walletAddress })
+        ...(validatedData.walletAddress && { walletAddress: validatedData.walletAddress }),
+        ...(validatedData.walletNetwork && { walletNetwork: validatedData.walletNetwork })
       },
       select: {
         id: true,
         username: true,
         email: true,
         walletAddress: true,
+        walletNetwork: true,
         isActive: true,
         isAdmin: true
       }
@@ -83,6 +86,7 @@ export async function GET(request: NextRequest) {
         username: true,
         email: true,
         walletAddress: true,
+        walletNetwork: true,
         isActive: true,
         isAdmin: true
       }
