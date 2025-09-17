@@ -7,6 +7,8 @@ export interface User {
   image?: string | null
   isActive?: boolean
   isAdmin?: boolean
+  acceptedTos?: boolean
+  tosAcceptedAt?: Date | null
 }
 
 export interface BountyStatus {
@@ -87,6 +89,8 @@ declare module "next-auth" {
       image?: string | null
       isActive?: boolean
       isAdmin?: boolean
+      acceptedTos?: boolean
+      tosAcceptedAt?: Date | null
     }
   }
 
@@ -97,6 +101,8 @@ declare module "next-auth" {
     walletAddress?: string | null
     isActive?: boolean
     isAdmin?: boolean
+    acceptedTos?: boolean
+    tosAcceptedAt?: Date | null
   }
 }
 
@@ -120,6 +126,7 @@ export interface BountyWithWinningSpots {
   deadline?: string
   createdAt: string
   submissionCount: number
+  submissionDisclaimer?: string
   creator: {
     username: string
     walletAddress: string | null
@@ -138,5 +145,7 @@ declare module "next-auth/jwt" {
     walletAddress?: string | null
     isActive?: boolean
     isAdmin?: boolean
+    acceptedTos?: boolean
+    tosAcceptedAt?: Date | null
   }
 }

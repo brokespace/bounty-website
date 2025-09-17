@@ -54,6 +54,8 @@ model User {
   votes             Vote[]
   bugReports        BugReport[]
   walletChangeLogs  WalletChangeLog[]
+  acceptedTos       Boolean           @default(false)
+  tosAcceptedAt     DateTime?
 
   @@map("users")
 }
@@ -80,6 +82,7 @@ model Bounty {
   deadline                DateTime?
   creatorId               String
   acceptedSubmissionTypes SubmissionContentType[] @default([FILE])
+  submissionDisclaimer    String?                 // Optional disclaimer text shown to users before submission
   creator                 User                    @relation(fields: [creatorId], references: [id])
   submissions             Submission[]
   suggestedBounty         SuggestedBounty?
@@ -188,6 +191,7 @@ model SuggestedBounty {
   deadline                DateTime?
   creatorId               String
   acceptedSubmissionTypes SubmissionContentType[] @default([FILE])
+  submissionDisclaimer    String?                 // Optional disclaimer text shown to users before submission
   creator                 User                    @relation(fields: [creatorId], references: [id])
   bounty                  Bounty?                 @relation(fields: [bountyId], references: [id])
   bountyId                String?                 @unique
@@ -357,7 +361,8 @@ model WinningSpot {
   suggestedBountyId String?
   bounty        Bounty?          @relation(fields: [bountyId], references: [id], onDelete: Cascade)
   suggestedBounty SuggestedBounty? @relation(fields: [suggestedBountyId], references: [id], onDelete: Cascade)
-  
+  percentOfTotal      Int? // 50/20/10
+
   @@unique([bountyId, position])
   @@unique([bountyId, hotkey])
   @@unique([suggestedBountyId, position])

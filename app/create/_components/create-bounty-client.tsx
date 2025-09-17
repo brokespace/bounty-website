@@ -47,6 +47,7 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
     deadline: '',
     hasDeadline: false,
     acceptedSubmissionTypes: ['FILE'] as string[],
+    submissionDisclaimer: '',
     winningSpotConfigs: [{ position: 1, reward: '', rewardCap: '', hotkey: '1' }]
   })
 
@@ -290,6 +291,22 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
                   onChange={(e) => handleInputChange('requirements', e.target.value)}
                   required
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="submissionDisclaimer">
+                  Submission Disclaimer <span className="text-xs text-muted-foreground">(Optional)</span>
+                </Label>
+                <Textarea
+                  id="submissionDisclaimer"
+                  placeholder="Add a custom disclaimer that users must accept before submitting to this bounty (supports markdown)..."
+                  rows={3}
+                  value={formData.submissionDisclaimer}
+                  onChange={(e) => handleInputChange('submissionDisclaimer', e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  This disclaimer will be shown to users before they can submit to your bounty.
+                </p>
               </div>
             </div>
 

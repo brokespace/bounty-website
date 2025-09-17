@@ -33,7 +33,8 @@ export const authOptions = {
                 email: user.email,
                 username: randomUsername,
                 isActive: true,
-                isAdmin: false
+                isAdmin: false,
+                acceptedTos: false
               }
             })
             
@@ -55,6 +56,8 @@ export const authOptions = {
         token.isAdmin = user.isAdmin
         token.email = user.email
         token.walletAddress = user.walletAddress
+        token.acceptedTos = user.acceptedTos
+        token.tosAcceptedAt = user.tosAcceptedAt
         token.isNewUser = user.isNewUser
       }
       return token
@@ -72,7 +75,9 @@ export const authOptions = {
           email: dbUser?.email,
           walletAddress: dbUser?.walletAddress,
           isActive: dbUser?.isActive,
-          isAdmin: dbUser?.isAdmin
+          isAdmin: dbUser?.isAdmin,
+          acceptedTos: dbUser?.acceptedTos,
+          tosAcceptedAt: dbUser?.tosAcceptedAt
         }
       } else {
         session.user = {
@@ -80,13 +85,15 @@ export const authOptions = {
           id: token.sub,
           username: token.username,
           isActive: token.isActive,
-          isAdmin: token.isAdmin
+          isAdmin: token.isAdmin,
+          acceptedTos: token.acceptedTos,
+          tosAcceptedAt: token.tosAcceptedAt
         }
       }
       return session
     },
     async redirect({ url, baseUrl, token }: any) {
-      // If user is new and doesn't have a wallet, redirect to profile setup
+      // If user is new and doesn't have a wallet or hasn't accepted TOS, redirect to profile setup
       if (token?.isNewUser) {
         return `${baseUrl}/profile?newUser=true`
       }

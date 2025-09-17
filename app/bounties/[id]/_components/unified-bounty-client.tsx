@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FileUpload } from '@/components/file-upload'
 import { FileDisplay } from '@/components/file-display'
+import { SubmissionDisclaimer } from '@/components/submission-disclaimer'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import ReactMarkdown from 'react-markdown'
 import {
@@ -66,6 +67,8 @@ export function UnifiedBountyClient({
 }: UnifiedBountyClientProps) {
   const router = useRouter()
   const [isSubmissionDialogOpen, setIsSubmissionDialogOpen] = useState(false)
+  const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false)
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [bountyData, setBountyData] = useState<any>(bounty?.loading ? null : bounty)
   const [allSubmissions, setAllSubmissions] = useState<any[]>([])
@@ -294,6 +297,38 @@ export function UnifiedBountyClient({
       navigator.clipboard.writeText(window.location.href)
       toast.success('Link copied to clipboard!')
     }
+  }
+
+  const handleSubmitClick = () => {
+    const currentBountyRef = bountyData || bounty
+    
+    // Check if bounty has a disclaimer
+    if (currentBountyRef?.submissionDisclaimer && !disclaimerAccepted) {
+      setIsDisclaimerVisible(true)
+    } else {
+      // Proceed directly to submission dialog
+      openSubmissionDialog()
+    }
+  }
+
+  const openSubmissionDialog = () => {
+    setTriggerUpload(false)
+    setUploadedFiles([])
+    setSubmissionId(null)
+    const currentBountyRef = bountyData || bounty
+    const defaultContentType = currentBountyRef?.acceptedSubmissionTypes?.[0] || 'FILE'
+    setSubmissionForm({ title: '', description: '', contentType: defaultContentType, urls: [''], textContent: '' })
+    setIsSubmissionDialogOpen(true)
+  }
+
+  const handleDisclaimerAccept = () => {
+    setDisclaimerAccepted(true)
+    setIsDisclaimerVisible(false)
+    openSubmissionDialog()
+  }
+
+  const handleDisclaimerDecline = () => {
+    setIsDisclaimerVisible(false)
   }
 
   const renderSubmission = (submission: any, isUserSubmission: boolean = false) => {
@@ -918,22 +953,19 @@ export function UnifiedBountyClient({
 
                       {/* Premium Submit Button */}
                       {canSubmit && (
-                        <Dialog open={isSubmissionDialogOpen} onOpenChange={(open) => {
-                          setIsSubmissionDialogOpen(open)
-                          if (open) {
-                            setTriggerUpload(false)
-                            setUploadedFiles([])
-                            setSubmissionId(null)
-                            const defaultContentType = currentBounty?.acceptedSubmissionTypes?.[0] || 'FILE'
-                            setSubmissionForm({ title: '', description: '', contentType: defaultContentType, urls: [''], textContent: '' })
-                          }
-                        }}>
-                          <DialogTrigger asChild>
-                            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-colors">
-                              <Trophy className="mr-2 h-4 w-4" />
-                              Submit Your Solution
-                            </Button>
-                          </DialogTrigger>
+                        <>
+                          <Button 
+                            onClick={handleSubmitClick}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-colors"
+                          >
+                            <Trophy className="mr-2 h-4 w-4" />
+                            Submit Your Solution
+                          </Button>
+                          
+                          <Dialog open={isSubmissionDialogOpen} onOpenChange={setIsSubmissionDialogOpen}>
+                            <DialogTrigger asChild>
+                              <div style={{ display: 'none' }} />
+                            </DialogTrigger>
                           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 w-[calc(100vw-2rem)] sm:w-full">
                             <DialogHeader>
                               <DialogTitle>Create Submission</DialogTitle>
@@ -1107,6 +1139,7 @@ export function UnifiedBountyClient({
                             </form>
                           </DialogContent>
                         </Dialog>
+                        </>
                       )}
 
                       {!canSubmit && !isAuthenticated && (
@@ -1655,6 +1688,16 @@ export function UnifiedBountyClient({
           </TabsContent>
         </Tabs>
       </motion.div>
+
+      {/* Submission Disclaimer */}
+      {(bountyData?.submissionDisclaimer || bounty?.submissionDisclaimer) && (
+        <SubmissionDisclaimer
+          disclaimer={bountyData?.submissionDisclaimer || bounty?.submissionDisclaimer}
+          onAccept={handleDisclaimerAccept}
+          onDecline={handleDisclaimerDecline}
+          isVisible={isDisclaimerVisible}
+        />
+      )}
     </div>
   )
 }

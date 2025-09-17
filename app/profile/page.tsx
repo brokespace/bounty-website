@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { User, Wallet, ArrowLeft } from 'lucide-react'
+import { User, Wallet, ArrowLeft, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 
@@ -21,6 +21,7 @@ function ProfileContent() {
     username: '',
     walletAddress: ''
   })
+  const [showTOSWarning, setShowTOSWarning] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -29,11 +30,22 @@ function ProfileContent() {
         username: session.user.username || '',
         walletAddress: session.user.walletAddress || ''
       })
+      // Check if user hasn't accepted TOS and show warning
+      if (session.user.acceptedTos === false) {
+        setShowTOSWarning(true)
+      }
     }
   }, [session])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check if TOS needs to be accepted first
+    if (session?.user?.acceptedTos === false) {
+      toast.error('Please accept the Terms of Service first')
+      router.push('/tos?required=true')
+      return
+    }
     
     // Client-side validation for new users
     if (isNewUser && (!formData.walletAddress || formData.walletAddress.trim() === '')) {
@@ -143,6 +155,25 @@ function ProfileContent() {
             </button>
           )}
         </div>
+
+        {showTOSWarning && (
+          <Card className="border-yellow-500/50 bg-yellow-50/50 backdrop-blur-sm mb-4">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-yellow-800">Terms of Service Required</p>
+                  <p className="text-xs text-yellow-700">You must accept our Terms of Service before updating your profile.</p>
+                </div>
+                <Link href="/tos?required=true">
+                  <Button variant="outline" size="sm" className="border-yellow-500 text-yellow-700 hover:bg-yellow-100">
+                    Accept TOS
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-muted/50 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center space-y-4">

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Navigation } from '@/components/navigation'
 import { BountyCard } from '@/components/bounty-card'
 import { BountiesClient } from './_components/bounties-client'
+import { AuthGuard } from '@/components/auth-guard'
 import { AnimatedSection } from '@/components/animated-section'
 import { Search, Filter, Plus, Trophy, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
@@ -129,25 +130,27 @@ export default async function BountiesPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-      <Navigation />
-      
-      <main className="container mx-auto max-w-7xl px-4 py-8">
-        {/* Admin Create Button */}
-        {session?.user?.isAdmin && (
-          <div className="flex justify-end mb-8">
-            <Link href="/create">
-              <Button size="lg" className="bg-primary hover:bg-primary/90">
-                <Plus className="mr-2 h-5 w-5" />
-                Create Bounty
-              </Button>
-            </Link>
-          </div>
-        )}
+    <AuthGuard requireWallet={true} requireTOS={true}>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
+        <Navigation />
+        
+        <main className="container mx-auto max-w-7xl px-4 py-8">
+          {/* Admin Create Button */}
+          {session?.user?.isAdmin && (
+            <div className="flex justify-end mb-8">
+              <Link href="/create">
+                <Button size="lg" className="bg-primary hover:bg-primary/90">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Create Bounty
+                </Button>
+              </Link>
+            </div>
+          )}
 
-        {/* Bounties List */}
-        <BountiesClient initialBounties={initialBounties} totalRewards={stats.totalRewards} />
-      </main>
-    </div>
+          {/* Bounties List */}
+          <BountiesClient initialBounties={initialBounties} totalRewards={stats.totalRewards} />
+        </main>
+      </div>
+    </AuthGuard>
   )
 }
