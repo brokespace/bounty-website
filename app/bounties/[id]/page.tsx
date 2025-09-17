@@ -30,7 +30,7 @@ export default async function BountyPage({ params }: BountyPageProps) {
   const isAuthenticated = !!session?.user?.id
   
   return (
-    <div className="min-h-screen bg-animated relative overflow-x-hidden">
+    <div className="bg-animated relative overflow-x-hidden">
       {/* Animated grid background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 animate-gradient-shift" />

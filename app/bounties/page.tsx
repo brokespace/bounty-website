@@ -95,17 +95,15 @@ async function getInitialBounties() {
     })
 
     return bounties.map((bounty: any) => {
-      const totalReward = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => 
-        sum + parseFloat(spot.reward.toString()), 0
-      )
-      const totalRewardCap = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => 
-        sum + parseFloat(spot.rewardCap.toString()), 0
-      )
-      
+      // Find the first place (position 1) config
+      const firstPlace = bounty.winningSpotConfigs.find((spot: any) => spot.position === 1)
+      const alphaReward = firstPlace ? firstPlace.reward.toString() : "0"
+      const alphaRewardCap = firstPlace ? firstPlace.rewardCap.toString() : "0"
+
       return {
         ...bounty,
-        alphaReward: totalReward.toString(),
-        alphaRewardCap: totalRewardCap.toString(),
+        alphaReward,
+        alphaRewardCap,
         submissionCount: bounty._count.submissions
       }
     })
@@ -131,7 +129,7 @@ export default async function BountiesPage() {
 
   return (
     <AuthGuard requireWallet={true} requireTOS={true}>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
+      <div className="bg-gradient-to-br from-background via-background to-muted/10">
         <Navigation />
         
         <main className="container mx-auto max-w-7xl px-4 py-8">

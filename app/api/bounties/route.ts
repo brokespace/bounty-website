@@ -64,18 +64,27 @@ export async function GET(req: NextRequest) {
       take: limit,
       skip: offset
     })
-
+    console.log("bounties", bounties)
     const formattedBounties = bounties.map((bounty: any) => {
-      const totalReward = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => sum + parseFloat(spot.reward.toString()), 0)
-      const totalRewardCap = bounty.winningSpotConfigs.reduce((sum: number, spot: any) => sum + parseFloat(spot.rewardCap.toString()), 0)
-      
+      // For each spot, show its percentOfTotal (if any) and reward as-is (no normalization)
+      // alphaReward is the reward for 1st place (position 1), or 0 if not present
+      // alphaRewardCap is the rewardCap for 1st place (position 1), or 0 if not present
+
+      // Find 1st place (position 1) config
+      const firstPlace = bounty.winningSpotConfigs.find((spot: any) => spot.position === 1)
+      console.log("firstPlace", firstPlace)
+      const alphaReward = firstPlace ? firstPlace.reward.toString() : "0"
+      const alphaRewardCap = firstPlace ? firstPlace.rewardCap.toString() : "0"
+
       return {
         ...bounty,
-        alphaReward: totalReward.toString(),
-        alphaRewardCap: totalRewardCap.toString(),
+        alphaReward,
+        alphaRewardCap,
         submissionCount: bounty._count.submissions,
         winningSpotConfigs: bounty.winningSpotConfigs.map((spot: any) => ({
           ...spot,
+          // Show percentOfTotal as-is (could be >100 for 2nd, 3rd, etc.)
+          percentOfTotal: spot.percentOfTotal,
           reward: spot.reward.toString(),
           rewardCap: spot.rewardCap.toString()
         }))

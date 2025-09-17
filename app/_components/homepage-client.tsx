@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { getSweRizzoPrice, formatUSDPrice } from '@/lib/coingecko'
+import Image from 'next/image'
 
 export function HomePageClient() {
   const { data: session, status } = useSession()
@@ -276,7 +277,7 @@ export function HomePageClient() {
                 
                 <CardContent className="p-8 text-center relative z-10">
                   <motion.div
-                    className="text-6xl mb-6"
+                    className="mb-6 flex justify-center"
                     animate={{ 
                       rotate: [0, 5, -5, 0],
                       scale: [1, 1.1, 1]
@@ -287,7 +288,17 @@ export function HomePageClient() {
                       ease: "easeInOut"
                     }}
                   >
-                    {step.icon}
+                    {typeof step.icon === "string" && step.icon.startsWith("/") ? (
+                      <Image
+                        src={step.icon}
+                        alt={step.title}
+                        width={80}
+                        height={80}
+                        className="w-20 h-20"
+                      />
+                    ) : (
+                      <span className="text-6xl">{step.icon}</span>
+                    )}
                   </motion.div>
                   
                   <div className="text-sm font-bold text-muted-foreground mb-2 tracking-wider">

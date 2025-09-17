@@ -365,9 +365,7 @@ model WinningSpot {
   percentOfTotal      Int? // 50/20/10
 
   @@unique([bountyId, position])
-  @@unique([bountyId, hotkey])
   @@unique([suggestedBountyId, position])
-  @@unique([suggestedBountyId, hotkey])
   @@map("winning_spots")
 }
 

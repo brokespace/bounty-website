@@ -966,11 +966,11 @@ export function UnifiedBountyClient({
                             <DialogTrigger asChild>
                               <div style={{ display: 'none' }} />
                             </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 w-[calc(100vw-2rem)] sm:w-full">
+                          <DialogContent className="max-w-2xl max-h-[85vh] mx-4 w-[calc(100vw-2rem)] sm:w-full">
                             <DialogHeader>
                               <DialogTitle>Create Submission</DialogTitle>
                             </DialogHeader>
-                            <form onSubmit={handleSubmissionSubmit} className="space-y-4">
+                            <form onSubmit={handleSubmissionSubmit} className="space-y-4 overflow-y-auto max-h-[calc(85vh-8rem)] px-1">
                               <div className="space-y-2">
                                 <Label htmlFor="title">Submission Title</Label>
                                 <Input
@@ -1268,7 +1268,7 @@ export function UnifiedBountyClient({
                             </a>
                           ),
                           table: ({ children }) => (
-                            <div className="overflow-x-auto my-4">
+                            <div className="my-4">
                               <table className="min-w-full border-collapse border border-border">
                                 {children}
                               </table>
@@ -1593,7 +1593,7 @@ export function UnifiedBountyClient({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="card-enhanced relative border border-purple/30 hover:border-purple/50 bg-card"
+              className="card-enhanced relative border border-purple/30 hover:border-purple/50 bg-card overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple/8 via-primary/8 to-accent/8 animate-gradient-shift" />
               <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-gradient-to-br from-purple/20 to-primary/20 rounded-full blur-3xl animate-float" />
@@ -1647,7 +1647,7 @@ export function UnifiedBountyClient({
                           </a>
                         ),
                         table: ({ children }) => (
-                          <div className="overflow-x-auto my-4">
+                          <div className="my-4">
                             <table className="min-w-full border-collapse border border-border">
                               {children}
                             </table>
