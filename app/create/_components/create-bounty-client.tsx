@@ -48,7 +48,7 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
     hasDeadline: false,
     acceptedSubmissionTypes: ['FILE'] as string[],
     submissionDisclaimer: '',
-    winningSpotConfigs: [{ position: 1, reward: '', rewardCap: '', hotkey: '1' }]
+    winningSpotConfigs: [{ position: 1, reward: '', rewardCap: '', coldkey: '1' }]
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,7 +75,7 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
       }
 
       for (const spot of formData.winningSpotConfigs) {
-        if (!spot.reward || !spot.rewardCap || !spot.hotkey) {
+        if (!spot.reward || !spot.rewardCap || !spot.coldkey) {
           toast.error(`Winning spot ${spot.position} is missing required fields`)
           return
         }
@@ -89,13 +89,13 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
         }
       }
 
-      // Check for duplicate hotkeys
-      const hotkeys = formData.winningSpotConfigs.map(s => s.hotkey)
-      const duplicateHotkeys = hotkeys.filter((key, index) => hotkeys.indexOf(key) !== index)
-      if (duplicateHotkeys.length > 0) {
-        toast.error('Winning spots cannot have duplicate hotkeys')
-        return
-      }
+      // Check for duplicate coldkeys
+      const coldkeys = formData.winningSpotConfigs.map(s => s.coldkey)
+      // const duplicateColdkeys = coldkeys.filter((key, index) => coldkeys.indexOf(key) !== index)
+      // if (duplicateColdkeys.length > 0) {
+      //   toast.error('Winning spots cannot have duplicate coldkeys')
+      //   return
+      // }
 
       if (formData.acceptedSubmissionTypes.length === 0) {
         toast.error('Must select at least one submission type')
@@ -159,7 +159,7 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
         position: i + 1,
         reward: '',
         rewardCap: '',
-        hotkey: (i + 1).toString()
+        coldkey: (i + 1).toString()
       }
     })
     setFormData(prev => ({ ...prev, winningSpotConfigs: newSpots }))
@@ -192,7 +192,7 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
         position: newPosition,
         reward: '',
         rewardCap: '',
-        hotkey: newPosition.toString()
+        coldkey: newPosition.toString()
       }],
       winningSpots: newPosition.toString()
     }))
@@ -351,7 +351,7 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                Configure individual rewards, caps, and hotkeys for each winning position
+                Configure individual rewards, caps, and coldkeys for each winning position
               </p>
               
               <div className="space-y-3">
@@ -411,12 +411,12 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
                       <div className="space-y-2">
                         <Label className="flex items-center gap-2">
                           <Trophy className="h-4 w-4 text-purple-500" />
-                          Hotkey
+                          Coldkey
                         </Label>
                         <Input
                           placeholder="1"
-                          value={spot.hotkey}
-                          onChange={(e) => updateWinningSpot(index, 'hotkey', e.target.value)}
+                          value={spot.coldkey}
+                          onChange={(e) => updateWinningSpot(index, 'coldkey', e.target.value)}
                           required
                         />
                       </div>

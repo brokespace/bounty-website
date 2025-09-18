@@ -40,7 +40,7 @@ interface SuggestedBounty {
     position: number
     reward: number
     rewardCap: number
-    hotkey: string
+    coldkey: string
   }[]
 }
 

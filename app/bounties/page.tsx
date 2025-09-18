@@ -67,7 +67,7 @@ async function getInitialBounties() {
           select: {
             id: true,
             username: true,
-            hotkey: true
+            coldkey: true
           }
         },
         categories: true,

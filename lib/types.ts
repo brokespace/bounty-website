@@ -114,7 +114,7 @@ export interface WinningSpot {
   position: number
   reward: string
   rewardCap: string
-  hotkey: string
+  coldkey: string
   bountyId: string
 }
 

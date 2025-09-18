@@ -842,7 +842,7 @@ export function UnifiedBountyClient({
                             }
 
                             // Generate a random URL for demonstration
-                            const hotkeyUrl = `https://taostats.io/hotkey/${spot.hotkey}`
+                            const coldkeyUrl = `https://taostats.io/account/${spot.coldkey}`
                             const styles = getPositionStyles(spot.position)
 
                             return (
@@ -862,17 +862,17 @@ export function UnifiedBountyClient({
                                     <div className={`text-sm font-medium ${styles.textColor} justify-self-start`}>
                                       {getPositionLabel(spot.position)}
                                     </div>
-                                    {/* Hotkey display */}
-                                    {spot.hotkey && (
+                                    {/* coldkey display */}
+                                    {spot.coldkey && (
                                       <a
-                                        href={hotkeyUrl}
+                                        href={coldkeyUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 border border-primary/30 rounded-full px-2 justify-self-start"
                                       >
                                         <Key className="h-3 w-3" />
                                         <span className="font-mono">
-                                          {spot.hotkey.length > 8 ? `${spot.hotkey.slice(0, 8)}...` : spot.hotkey}
+                                          {spot.coldkey.length > 8 ? `${spot.coldkey.slice(0, 8)}...` : spot.coldkey}
                                         </span>
                                       </a>
                                     )}

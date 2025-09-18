@@ -1,6 +1,5 @@
 generator client {
   provider      = "prisma-client-js"
-  output        = "/home/rizzo/bounty-website/node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
@@ -90,6 +89,7 @@ model Bounty {
   categories              BountyCategory[]        @relation("BountyToBountyCategory")
   screenerSupports        ScreenerBountySupport[]
   winningSpotConfigs      WinningSpot[]
+  percentOfTreasury       Int                     @default(0)
 
   @@map("bounties")
 }
@@ -356,7 +356,7 @@ model WinningSpot {
   position      Int     // 1st, 2nd, 3rd place etc.
   reward        Decimal @db.Decimal(18, 8)
   rewardCap     Decimal @db.Decimal(18, 8)
-  hotkey        String  // e.g., "1", "2", "3" or "F1", "F2", etc.
+  coldkey        String  // e.g., "1", "2", "3" or "F1", "F2", etc.
   createdAt     DateTime @default(now())
   bountyId      String?
   suggestedBountyId String?

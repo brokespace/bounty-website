@@ -37,7 +37,7 @@ interface BountyCardProps {
       position: number
       reward: string
       rewardCap: string
-      hotkey: string
+      coldkey: string
     }>
   }
   index?: number

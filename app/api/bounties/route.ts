@@ -162,11 +162,11 @@ export async function POST(req: NextRequest) {
 
     // Validate winning spots if provided
     if (winningSpotConfigs && Array.isArray(winningSpotConfigs) && winningSpotConfigs.length > 0) {
-      const hotkeys = winningSpotConfigs.map((spot: any) => spot.hotkey)
-      const duplicateHotkeys = hotkeys.filter((key: string, index: number) => hotkeys.indexOf(key) !== index)
-      if (duplicateHotkeys.length > 0) {
+      const coldkeys = winningSpotConfigs.map((spot: any) => spot.coldkey)
+      const duplicatecoldkeys = coldkeys.filter((key: string, index: number) => coldkeys.indexOf(key) !== index)
+      if (duplicatecoldkeys.length > 0) {
         return NextResponse.json(
-          { error: `Duplicate hotkeys found: ${duplicateHotkeys.join(', ')}` },
+          { error: `Duplicate coldkeys found: ${duplicatecoldkeys.join(', ')}` },
           { status: 400 }
         )
       }
@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
             position: spot.position,
             reward: parseFloat(spot.reward),
             rewardCap: parseFloat(spot.rewardCap),
-            hotkey: spot.hotkey
+            coldkey: spot.coldkey
           }))
         } : undefined
       },
