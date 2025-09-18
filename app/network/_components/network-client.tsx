@@ -45,7 +45,7 @@ export function NetworkClient() {
   useEffect(() => {
     const fetchScreeners = async () => {
       try {
-        const response = await fetch('/api/screeners')
+        const response = await fetch(`/api/screeners?t=${Date.now()}`)
         
         if (!response.ok) {
           throw new Error('Failed to fetch screeners')
