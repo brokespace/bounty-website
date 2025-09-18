@@ -149,7 +149,7 @@ export async function PUT(
                 position: ws.position,
                 reward: ws.reward,
                 rewardCap: ws.rewardCap,
-                hotkey: ws.hotkey
+                coldkey: ws.coldkey
               }))
             }
           }
