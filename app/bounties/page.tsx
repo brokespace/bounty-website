@@ -128,7 +128,7 @@ export default async function BountiesPage() {
   ]
 
   return (
-    <AuthGuard requireWallet={true} requireTOS={true}>
+    // <AuthGuard requireWallet={true} requireTOS={true}>
       <div className="bg-gradient-to-br from-background via-background to-muted/10">
         <Navigation />
         
@@ -149,6 +149,6 @@ export default async function BountiesPage() {
           <BountiesClient initialBounties={initialBounties} totalRewards={stats.totalRewards} />
         </main>
       </div>
-    </AuthGuard>
+    // {/* </AuthGuard> */}
   )
 }

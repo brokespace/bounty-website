@@ -15,12 +15,27 @@ export async function GET() {
       where: { status: 'COMPLETED' }
     })
 
-    // Get total rewards (sum of all winning spot rewards)
-    const totalRewards = await prisma.winningSpot.aggregate({
-      _sum: { reward: true }
-    })
-    const totalRewardsAmount = totalRewards._sum.reward || 0
+    // For each bounty, find the winning spot with 100% and sum their rewards
+    const bountiesWithWinningSpots = await prisma.bounty.findMany({
+      select: {
+        id: true,
+        winningSpotConfigs: true
+      }
+    });
 
+    // Sum the reward of the 100% winning spot for each bounty (if exists)
+    let totalRewardsAmount = 0
+    for (const bounty of bountiesWithWinningSpots) {
+      if (bounty.winningSpotConfigs && Array.isArray(bounty.winningSpotConfigs)) {
+        // Find the winning spot with percentOfTotal === 100
+        const winningSpot = bounty.winningSpotConfigs.find(
+          (spot: any) => spot.percentOfTotal === 100
+        );
+        if (winningSpot) {
+          totalRewardsAmount += Number(winningSpot.reward) || 0;
+        }
+      }
+    }
     // Get user count
     const totalUsers = await prisma.user.count({
       where: { isActive: true }

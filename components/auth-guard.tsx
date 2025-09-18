@@ -38,10 +38,10 @@ export function AuthGuard({ children, requireWallet = true, requireTOS = true }:
       }
 
       // Then check wallet address (only if TOS is accepted or not required)
-      if (requireWallet && (!session.user.walletAddress || session.user.walletAddress.trim() === '')) {
-        router.push('/profile?newUser=true')
-        return
-      }
+      // if (requireWallet && (!session.user.walletAddress || session.user.walletAddress.trim() === '')) {
+      //   router.push('/profile?newUser=true')
+      //   return
+      // }
     }
   }, [session, status, router, pathname, requireWallet, requireTOS])
 
@@ -68,13 +68,13 @@ export function AuthGuard({ children, requireWallet = true, requireTOS = true }:
   }
 
   // Don't render if wallet not set and required (unless on auth, TOS, or profile pages)
-  if (requireWallet && 
-      (!session?.user?.walletAddress || session.user.walletAddress.trim() === '') &&
-      !pathname.startsWith('/auth/') && 
-      pathname !== '/tos' && 
-      pathname !== '/profile') {
-    return null
-  }
+  // if (requireWallet && 
+  //     (!session?.user?.walletAddress || session.user.walletAddress.trim() === '') &&
+  //     !pathname.startsWith('/auth/') && 
+  //     pathname !== '/tos' && 
+  //     pathname !== '/profile') {
+  //   return null
+  // }
 
   return <>{children}</>
 }
