@@ -124,7 +124,17 @@ export function HomePageClient() {
     { 
       label: "Total Rewards", 
       value: stats.totalRewards, 
-      usdValue: stats.totalRewards !== '0' ? formatUSDPrice(stats.totalRewards.replace(/[^\d.]/g, ''), usdPrice).replace('$', '') : '0.00',
+      usdValue: stats.totalRewards !== '0' ? (() => {
+        const numericValue = stats.totalRewards.replace(/[^\d.]/g, '')
+        const usdAmount = formatUSDPrice(numericValue, usdPrice).replace('$', '')
+        // Preserve the K/M suffix from the original value
+        if (stats.totalRewards.includes('K')) {
+          return parseFloat(usdAmount) >= 1000 ? `${(parseFloat(usdAmount) / 1000).toFixed(1)}K` : `${parseFloat(usdAmount).toFixed(0)}K`
+        } else if (stats.totalRewards.includes('M')) {
+          return parseFloat(usdAmount) >= 1000000 ? `${(parseFloat(usdAmount) / 1000000).toFixed(1)}M` : `${(parseFloat(usdAmount) / 1000).toFixed(0)}K`
+        }
+        return usdAmount
+      })() : '0.00',
       icon: <Coins className="h-5 w-5" /> 
     },
     // { label: "Users", value: stats.totalUsers, icon: <Users className="h-5 w-5" /> },

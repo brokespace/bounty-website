@@ -64,9 +64,14 @@ export function formatUSDPrice(alphaAmount: string | number, usdPrice: number): 
   if (isNaN(alpha) || usdPrice === 0) {
     return '0.00'
   }
-  
+
   const usdValue = alpha * usdPrice
-  
+
+  // If input already contains K or M, keep it as is (string only)
+  if (typeof alphaAmount === 'string' && /[KM]$/i.test(alphaAmount.trim())) {
+    return alphaAmount.trim()
+  }
+
   // Format based on value size
   if (usdValue < 0.01) {
     return '<0.01'
