@@ -9,7 +9,7 @@ export default async function CreateBountyPage() {
   const session = await getServerSession(authOptions)
   
   if (!session?.user?.id) {
-    redirect('/auth/signin')
+    redirect('/auth/signin?callbackUrl=/create')
   }
 
   if (!session?.user?.isAdmin) {

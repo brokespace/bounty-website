@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -13,24 +13,33 @@ import Link from 'next/link'
 
 export default function SignInPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { data: session, status } = useSession()
   const [isLoading, setIsLoading] = useState(false)
+  
+  const callbackUrl = searchParams.get('callbackUrl') || '/bounties'
 
   useEffect(() => {
     if (status === 'authenticated' && session) {
-      router.push('/bounties')
+      router.push(callbackUrl)
     }
-  }, [status, session, router])
+  }, [status, session, router, callbackUrl])
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
-      await signIn('google')
+      await signIn('google', { callbackUrl })
     } catch (error) {
       console.error('Sign in error:', error)
     } finally {
       setIsLoading(false)
     }
+  }
+  
+  const handleBackClick = () => {
+    // Don't go back to a protected page that would redirect again
+    // Instead, go to home page or use a safe fallback
+    router.push('/')
   }
 
   if (status === 'loading') {
@@ -55,7 +64,7 @@ export default function SignInPage() {
         {/* <Navigation /> */}
         <div className="mb-6">
           <button 
-            onClick={() => router.back()}
+            onClick={handleBackClick}
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />

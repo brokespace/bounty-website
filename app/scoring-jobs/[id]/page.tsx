@@ -14,7 +14,7 @@ export default async function ScoringJobPage({ params }: Props) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {
-    redirect('/auth/signin')
+    redirect(`/auth/signin?callbackUrl=/scoring-jobs/${params.id}`)
   }
 
   const scoringJob = await prisma.scoringJob.findUnique({

@@ -18,9 +18,10 @@ export function AuthGuard({ children, requireWallet = true, requireTOS = true }:
   useEffect(() => {
     if (status === 'loading') return
 
-    // If not authenticated, redirect to sign in
+    // If not authenticated, redirect to sign in with current path as callback
     if (status === 'unauthenticated') {
-      router.push('/auth/signin')
+      const callbackUrl = encodeURIComponent(pathname)
+      router.push(`/auth/signin?callbackUrl=${callbackUrl}`)
       return
     }
 
