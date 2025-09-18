@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
               position: ws.position,
               reward: parseFloat(ws.reward),
               rewardCap: parseFloat(ws.rewardCap),
-              hotkey: ws.hotkey
+              coldkey: ws.coldkey
             }))
           } : undefined
         },

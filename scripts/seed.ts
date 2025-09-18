@@ -122,7 +122,7 @@ async function main() {
             position: 1,
             reward: alphaReward,
             rewardCap: alphaRewardCap,
-            hotkey: "1"
+            coldkey: "1"
           }]
         }
       }
