@@ -923,6 +923,24 @@ export function UnifiedBountyClient({
                               )}
                             </div>
                           </div>
+                          {/* coldkey display for single spot */}
+                          {currentBounty.winningSpotConfigs[0]?.coldkey && (
+                            <div className="flex items-center justify-center">
+                              <a
+                                href={`https://taostats.io/account/${currentBounty.winningSpotConfigs[0].coldkey}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 border border-primary/30 rounded-full px-2 py-1"
+                              >
+                                <Key className="h-3 w-3" />
+                                <span className="font-mono">
+                                  {currentBounty.winningSpotConfigs[0].coldkey.length > 8 
+                                    ? `${currentBounty.winningSpotConfigs[0].coldkey.slice(0, 8)}...` 
+                                    : currentBounty.winningSpotConfigs[0].coldkey}
+                                </span>
+                              </a>
+                            </div>
+                          )}
                           <div className="text-sm text-gray-500">
                             Winner takes all
                           </div>
