@@ -218,7 +218,7 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
                   <Trophy className="h-4 w-4 text-accent" />
                   <div>
                     <div className="text-sm font-bold text-gradient">{bounty.winningSpotConfigs?.length || bounty.winningSpots}</div>
-                    <div className="text-xs text-muted-foreground">Possible Winners</div>
+                    <div className="text-xs text-muted-foreground">Places to win</div>
                   </div>
                 </motion.div>
               </div>
