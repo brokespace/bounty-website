@@ -403,7 +403,7 @@ export function HomePageClient() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="grid grid-cols-2 md:grid-cols-2 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
         >
           {statsData.map((stat, index) => (
             <motion.div

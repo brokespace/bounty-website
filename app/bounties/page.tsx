@@ -38,10 +38,12 @@ async function getBountyStats() {
     })
 
     const totalRewards = bountiesWithConfigs.reduce((sum, bounty) => {
-      const bountyTotal = bounty.winningSpotConfigs.reduce((spotSum, spot) => 
-        spotSum + parseFloat(spot.reward.toString()), 0
+      // Find the winning spot where percentOfTotal is 100
+      const spot = bounty.winningSpotConfigs.find(
+        (spot) => spot.percentOfTotal === 100
       )
-      return sum + bountyTotal
+      const reward = spot ? parseFloat(spot.reward.toString()) : 0
+      return sum + reward
     }, 0)
 
     return {
