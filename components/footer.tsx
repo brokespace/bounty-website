@@ -29,8 +29,14 @@ export function Footer({ className }: FooterProps) {
             </div>
           </div>
           
-          {/* Right side - Bug report button */}
+          {/* Right side - Links and Bug report button */}
           <div className="flex items-center gap-4">
+            <Link 
+              href="/tos"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Terms of Service
+            </Link>
             <BugReportForm 
               trigger={
                 <button className="inline-flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-muted/50">

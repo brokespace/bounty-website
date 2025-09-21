@@ -19,11 +19,12 @@ function TOSContent() {
   const [hasAccepted, setHasAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Only require authentication if this is a required ToS acceptance
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (isRequired && status === 'unauthenticated') {
       router.push('/auth/signin')
     }
-  }, [status, router])
+  }, [status, router, isRequired])
 
   const handleAcceptTOS = async () => {
     if (!hasAccepted) {
@@ -72,7 +73,7 @@ function TOSContent() {
     }
   }
 
-  if (status === 'loading') {
+  if (isRequired && status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">Loading...</div>
@@ -80,7 +81,7 @@ function TOSContent() {
     )
   }
 
-  if (!session) {
+  if (isRequired && !session) {
     return null
   }
 
@@ -119,7 +120,10 @@ function TOSContent() {
                 Terms of Service
               </CardTitle>
               <CardDescription>
-                Please read and accept our Terms of Service to continue using the platform
+                {isRequired 
+                  ? 'Please read and accept our Terms of Service to continue using the platform'
+                  : 'Our Terms of Service and Submission Agreement'
+                }
               </CardDescription>
             </div>
           </CardHeader>
@@ -324,27 +328,31 @@ function TOSContent() {
               </div>
             </ScrollArea>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="accept-tos" 
-                checked={hasAccepted}
-                onCheckedChange={(checked) => setHasAccepted(checked === true)}
-              />
-              <label
-                htmlFor="accept-tos"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                I have read and agree to the Terms of Service &amp; Submission Agreement
-              </label>
-            </div>
+            {isRequired && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="accept-tos" 
+                    checked={hasAccepted}
+                    onCheckedChange={(checked) => setHasAccepted(checked === true)}
+                  />
+                  <label
+                    htmlFor="accept-tos"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I have read and agree to the Terms of Service &amp; Submission Agreement
+                  </label>
+                </div>
 
-            <Button 
-              onClick={handleAcceptTOS}
-              className="w-full" 
-              disabled={!hasAccepted || isLoading}
-            >
-              {isLoading ? 'Accepting...' : 'Accept Terms of Service & Continue'}
-            </Button>
+                <Button 
+                  onClick={handleAcceptTOS}
+                  className="w-full" 
+                  disabled={!hasAccepted || isLoading}
+                >
+                  {isLoading ? 'Accepting...' : 'Accept Terms of Service & Continue'}
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       </motion.div>
