@@ -47,7 +47,7 @@ const accomplishments: LeaderboardEntry[] = [
     totalParticipants: 45,
     score: 46.6,
     maxScore: 100,
-    dateAchieved: '2024-09-15',
+    dateAchieved: '2025-09-15',
     organization: 'UC Berkeley',
     leaderboardUrl: 'https://gorilla.cs.berkeley.edu/leaderboard.html',
     trend: 'up',
