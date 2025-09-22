@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useSession, signOut } from 'next-auth/react'
-import { Wallet, Plus, Trophy, User, LogOut, Menu, X, Lightbulb, Settings, Target, Activity } from 'lucide-react'
+import { Wallet, Plus, Trophy, User, LogOut, Menu, X, Lightbulb, Settings, Target, Activity, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -35,6 +35,7 @@ export function Navigation({ className }: NavigationProps) {
   const navigationItems = [
     { href: '/bounties', label: 'Bounties', icon: Trophy },
     { href: '/network', label: 'Network Status', icon: Activity },
+    { href: '/faq', label: 'FAQ', icon: HelpCircle },
     // { href: '/milestones', label: 'Roadmap', icon: Target },
     ...(session?.user?.isAdmin ? [
       { href: '/create', label: 'Create Bounty', icon: Plus },
