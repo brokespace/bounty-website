@@ -63,14 +63,33 @@ export async function GET(
 
     console.log(`[Logs API] Using Seq server: ${seqUrl}`)
 
+    // Check pagination parameters
+    const { searchParams } = new URL(request.url)
+    const full = searchParams.get('full') === 'true'
+    const limit = parseInt(searchParams.get('limit') || '100')
+    const page = parseInt(searchParams.get('page') || '0')
+    const before = searchParams.get('before') // Timestamp to fetch logs before
+    
     // Seq uses ISO 8601 timestamps, not nanoseconds
     const now = new Date()
-    const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000)) // 1 hour ago
+    let startTime: Date
+    let endTime: Date = now
+    
+    if (full) {
+      startTime = new Date('2020-01-01') // Far back date to get all logs
+    } else if (before) {
+      // For pagination, fetch logs before the given timestamp
+      endTime = new Date(before)
+      startTime = new Date('2020-01-01') // Go far back to ensure we get older logs
+    } else {
+      // Initial load - get recent logs
+      startTime = new Date(now.getTime() - (24 * 60 * 60 * 1000)) // 24 hours ago
+    }
     
     // Seq query syntax - filter by job_id tag
     const filter = `job_id = '${params.id}'`
 
-    console.log(`[Logs API] Querying Seq with filter: ${filter}, from: ${oneHourAgo.toISOString()}, to: ${now.toISOString()}`)
+    console.log(`[Logs API] Querying Seq with filter: ${filter}, from: ${startTime.toISOString()}, to: ${endTime.toISOString()}, limit: ${limit}, page: ${page}, before: ${before}`)
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json'
@@ -80,14 +99,21 @@ export async function GET(
       headers['X-Seq-ApiKey'] = seqApiKey
     }
 
+    const seqParams = new URLSearchParams({
+      filter,
+      from: startTime.toISOString(),
+      to: endTime.toISOString(),
+      count: (full ? 1000000 : limit).toString()
+    })
+
+    // For pagination, we need to handle ordering
+    if (!full && !before) {
+      // Initial load - get most recent logs first, then we'll reverse them
+      seqParams.append('order', 'desc')
+    }
+
     const seqResponse = await fetch(
-      `${seqUrl}/api/events?` +
-      new URLSearchParams({
-        filter,
-        from: oneHourAgo.toISOString(),
-        to: now.toISOString(),
-        count: '1000'
-      }),
+      `${seqUrl}/api/events?${seqParams}`,
       {
         headers
       }
@@ -102,6 +128,12 @@ export async function GET(
 
     const seqData = await seqResponse.json()
     console.log(`[Logs API] Successfully retrieved ${seqData.Events?.length || 0} log events for job: ${params.id}`)
+    
+    // For initial load with recent logs, reverse the order so oldest is first
+    if (!full && !before && seqData.Events) {
+      seqData.Events.reverse()
+    }
+    
     console.log(seqData)
     return NextResponse.json(seqData)
   } catch (error) {
