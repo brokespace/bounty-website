@@ -418,7 +418,9 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
                         {/* Left Content Area */}
                         <div className="flex-1 p-6">
                           <div className="flex items-center gap-3 mb-3">
-                            <h3 className="text-lg font-bold text-gradient bg-gradient-to-r from-accent to-purple bg-clip-text text-transparent">{submission.title}</h3>
+                            <Link href={`/submissions/${submission.id}`}>
+                              <h3 className="text-lg font-bold text-gradient bg-gradient-to-r from-accent to-purple bg-clip-text text-transparent hover:from-purple hover:to-primary transition-all duration-300 cursor-pointer">{submission.title}</h3>
+                            </Link>
                             <Badge variant="secondary" className={`${getStatusColor(submission.status)} shadow-sm font-medium`}>
                               {submission.status}
                             </Badge>
@@ -494,55 +496,57 @@ export function DashboardClient({ initialData, user }: DashboardClientProps) {
                         </div>
 
                         {/* Right Score Area */}
-                        <div className="flex flex-col items-center justify-center p-6 border-l border-accent/20 min-w-[140px] bg-gradient-to-br from-accent/5 to-purple/5">
-                          {submission.score ? (
-                            <motion.div 
-                              whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-                              transition={{ duration: 0.3 }}
-                              className="text-center"
-                            >
-                              <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-500/20 blur-xl rounded-full animate-pulse" />
-                                <div className="relative bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 p-4 rounded-2xl shadow-lg border border-green-400/30">
-                                  <div className="text-3xl font-bold text-white mb-1">
-                                    {submission.score}
-                                  </div>
-                                  <div className="text-xs text-white/80 font-medium">
-                                    /100
-                                  </div>
-                                </div>
-                              </div>
+                        <Link href={`/submissions/${submission.id}`}>
+                          <div className="flex flex-col items-center justify-center p-6 border-l border-accent/20 min-w-[140px] bg-gradient-to-br from-accent/5 to-purple/5 hover:from-accent/10 hover:to-purple/10 transition-all duration-300 cursor-pointer">
+                            {submission.score ? (
                               <motion.div 
-                                animate={{ scale: [1, 1.05, 1] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                className="flex items-center gap-1 mt-2 text-xs font-bold text-gradient bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"
+                                whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+                                transition={{ duration: 0.3 }}
+                                className="text-center"
                               >
-                                <TrendingUp className="h-3 w-3 text-green-500" />
-                                SCORE
-                              </motion.div>
-                            </motion.div>
-                          ) : (
-                            <motion.div 
-                              animate={{ rotate: [0, 360] }}
-                              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                              className="text-center"
-                            >
-                              <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-orange/20 to-amber/20 blur-xl rounded-full animate-pulse" />
-                                <div className="relative bg-gradient-to-r from-orange/10 to-amber/10 p-4 rounded-2xl shadow-lg border border-orange/30 backdrop-blur-sm">
-                                  <div className="text-2xl font-bold text-orange-500 mb-1">
-                                    ⏳
+                                <div className="relative">
+                                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-500/20 blur-xl rounded-full animate-pulse" />
+                                  <div className="relative bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 p-4 rounded-2xl shadow-lg border border-green-400/30">
+                                    <div className="text-3xl font-bold text-white mb-1">
+                                      {submission.score}
+                                    </div>
+                                    <div className="text-xs text-white/80 font-medium">
+                                      /100
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-1 mt-2 text-xs font-bold text-orange-500">
-                                <Clock className="h-3 w-3" />
-                                PENDING
-                              </div>
-                            </motion.div>
-                          )}
-                          
-                        </div>
+                                <motion.div 
+                                  animate={{ scale: [1, 1.05, 1] }}
+                                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                  className="flex items-center gap-1 mt-2 text-xs font-bold text-gradient bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"
+                                >
+                                  <TrendingUp className="h-3 w-3 text-green-500" />
+                                  SCORE
+                                </motion.div>
+                              </motion.div>
+                            ) : (
+                              <motion.div 
+                                animate={{ rotate: [0, 360] }}
+                                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                                className="text-center"
+                              >
+                                <div className="relative">
+                                  <div className="absolute inset-0 bg-gradient-to-r from-orange/20 to-amber/20 blur-xl rounded-full animate-pulse" />
+                                  <div className="relative bg-gradient-to-r from-orange/10 to-amber/10 p-4 rounded-2xl shadow-lg border border-orange/30 backdrop-blur-sm">
+                                    <div className="text-2xl font-bold text-orange-500 mb-1">
+                                      ⏳
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 mt-2 text-xs font-bold text-orange-500">
+                                  <Clock className="h-3 w-3" />
+                                  PENDING
+                                </div>
+                              </motion.div>
+                            )}
+                            
+                          </div>
+                        </Link>
                       </div>
                     </CardContent>
                   </Card>

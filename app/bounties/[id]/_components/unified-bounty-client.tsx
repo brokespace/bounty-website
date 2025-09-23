@@ -45,7 +45,8 @@ import {
   ArrowRight,
   FileStack,
   DollarSign,
-  RefreshCw
+  RefreshCw,
+  ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -497,6 +498,28 @@ export function UnifiedBountyClient({
                         'bg-orange-500 shadow-orange-500/50'
                     } shadow-lg`} />
 
+                  {/* Enhanced View Details Button */}
+                  {(isAdmin || user?.id === submission.submitterId) && (
+                    <Link href={`/submissions/${submission.id}`}>
+                      <motion.div 
+                        whileHover={{ scale: 1.05, y: -2 }} 
+                        whileTap={{ scale: 0.95 }}
+                        className="group"
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="glass-effect border border-gradient-to-r from-primary/40 to-accent/40 hover:from-primary/60 hover:to-accent/60 text-primary hover:text-white bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/20 hover:to-accent/20 transition-all duration-500 shadow-lg hover:shadow-xl hover:shadow-primary/30 rounded-xl font-medium backdrop-blur-sm group-hover:backdrop-blur-md"
+                        >
+                          <Eye className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:scale-110" />
+                          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent group-hover:from-white group-hover:to-white group-hover:text-white transition-all duration-300">
+                            Explore
+                          </span>
+                        </Button>
+                      </motion.div>
+                    </Link>
+                  )}
+
                   {/* Admin Rescore Button */}
                   {isAdmin && (
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -605,29 +628,55 @@ export function UnifiedBountyClient({
                 )}
               </div>
 
-              {/* Display URLs only if not anonymized */}
+              {/* Enhanced URLs Display */}
               {!shouldAnonymize && submission.urls && submission.urls.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Link2 className="h-4 w-4 text-blue-500" />
-                    Links
+                <div className="mb-4 pr-2 mr-2">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2 ">
+                    <Link2 className="h-4 w-4 text-primary" />
+                    <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                      Submission Links
+                    </span>
                   </h4>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {submission.urls.map((url: string, urlIndex: number) => (
-                      <div key={urlIndex} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-blue-50/50 border border-blue-100 rounded-lg hover:bg-blue-50 transition-colors min-w-0">
-                        <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Link2 className="h-4 w-4 text-blue-600" />
+                      <Link href={url} target="_blank" rel="noopener noreferrer">
+                      <motion.div 
+                        key={urlIndex} 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: urlIndex * 0.1 }}
+                        whileHover={{ y: -1 }}
+                        className="group w-full"
+                      >
+                        <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 glass-effect border border-primary/20 hover:border-primary/40 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary/10 backdrop-blur-sm w-full overflow-hidden">
+                          <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex items-center justify-center group-hover:from-primary/30 group-hover:to-accent/30 transition-all duration-300">
+                            <Link2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary group-hover:scale-110 transition-transform duration-300" />
+                          </div>
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:text-accent font-medium block truncate transition-colors duration-300 group-hover:text-accent text-sm sm:text-base"
+                              title={url}
+                            >
+                              {url}
+                            </a>
+                            <p className="text-xs text-muted-foreground mt-1 opacity-70 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                              Click to open in new tab
+                            </p>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <motion.div
+                              whileHover={{ rotate: 45 }}
+                              className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg flex items-center justify-center group-hover:from-primary/20 group-hover:to-accent/20 transition-all duration-300"
+                            >
+                              <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 text-primary/70 group-hover:text-primary transition-colors duration-300" />
+                            </motion.div>
+                          </div>
                         </div>
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 font-medium break-all flex-1 min-w-0 overflow-hidden"
-                          title={url}
-                        >
-                          {url}
-                        </a>
-                      </div>
+                      </motion.div>
+                      </Link>
                     ))}
                   </div>
                 </div>
