@@ -817,33 +817,11 @@ export function UnifiedBountyClient({
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
             {/* Left Side - Bounty Info */}
-            <div className="flex-1 space-y-4">
+           <div className="flex-1 space-y-4"> 
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge className={`${getStatusColor(currentBounty?.status || 'DRAFT')} text-xs px-3 py-1 rounded-lg`}>
                   {currentBounty?.status || 'DRAFT'}
                 </Badge>
-                {currentBounty?.isPublished !== undefined && (
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs px-3 py-1 rounded-lg ${
-                      currentBounty?.isPublished 
-                        ? 'bg-green-50 text-green-700 border-green-300' 
-                        : 'bg-orange-50 text-orange-700 border-orange-300'
-                    }`}
-                  >
-                    {currentBounty?.isPublished ? (
-                      <>
-                        <Eye className="h-3 w-3 mr-1" />
-                        Published
-                      </>
-                    ) : (
-                      <>
-                        <EyeOff className="h-3 w-3 mr-1" />
-                        Unpublished
-                      </>
-                    )}
-                  </Badge>
-                )}
                 {currentBounty?.categories?.map((category: any) => (
                   <Badge
                     key={category.id}
