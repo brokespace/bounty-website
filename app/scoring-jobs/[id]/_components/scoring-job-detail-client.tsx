@@ -93,7 +93,7 @@ export function ScoringJobDetailClient({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Navigation */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
