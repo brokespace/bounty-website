@@ -160,6 +160,7 @@ export async function PUT(
         { status: 403 }
       )
     }
+    const updateData = await req.json()
     
     // Non-admins can't update isPublished field
     if (!isAdmin && updateData.hasOwnProperty('isPublished')) {
@@ -183,7 +184,6 @@ export async function PUT(
       }
     }
 
-    const updateData = await req.json()
     
     // Convert numeric fields
     if (updateData.deadline) {
