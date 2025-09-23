@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
+import { cookies } from 'next/headers'
 
 const prisma = new PrismaClient()
 
@@ -9,6 +10,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const _cookies = cookies()
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
@@ -21,14 +23,31 @@ export async function GET(
         submission: {
           include: {
             bounty: {
-              select: { title: true, id: true, creatorId: true }
+              select: { 
+                title: true, 
+                id: true, 
+                creatorId: true,
+                info: true,
+                problem: true,
+                requirements: true,
+                tasks: true
+              }
             },
             submitter: {
-              select: { id: true, username: true }
-            }
+              select: { id: true, username: true, walletAddress: true }
+            },
+            files: true
           }
         },
-        screener: true
+        screener: true,
+        scoringTasks: {
+          include: {
+            task: true
+          },
+          orderBy: {
+            createdAt: 'asc'
+          }
+        }
       }
     })
 

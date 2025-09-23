@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, Trophy, Users, Coins, Medal, Key, User, ArrowRight, DollarSign } from 'lucide-react'
+import { Calendar, Clock, Trophy, Users, Coins, Medal, Key, User, ArrowRight, DollarSign, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { getSweRizzoPrice, formatUSDPrice } from '@/lib/coingecko'
@@ -21,6 +21,7 @@ interface BountyCardProps {
     rewardDistribution: 'ALL_AT_ONCE' | 'OVER_TIME'
     winningSpots: number
     status: string
+    isPublished?: boolean
     deadline?: string
     createdAt: string
     submissionCount: number
@@ -119,10 +120,34 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
       className="h-full group"
     >
       <Link href={`/bounties/${bounty.id}`} className="block h-full">
-        <Card className="h-full relative overflow-hidden border border-primary/30 hover:border-primary/50 bg-card/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group-hover:shadow-primary/20">
+        <Card className={`h-full relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ${
+          bounty.isPublished === false 
+            ? 'border-2 border-red-300 hover:border-red-400 bg-red-50/30 backdrop-blur-sm group-hover:shadow-red-200' 
+            : 'border border-primary/30 hover:border-primary/50 bg-card/80 backdrop-blur-sm group-hover:shadow-primary/20'
+        }`}>
           {/* Background Effects */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/8 to-purple/8 opacity-50 group-hover:opacity-100 transition-all duration-500" />
-          <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-accent/20 to-purple/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+          <div className={`absolute inset-0 opacity-50 group-hover:opacity-100 transition-all duration-500 ${
+            bounty.isPublished === false 
+              ? 'bg-gradient-to-br from-red-200/20 via-orange-200/20 to-red-300/20' 
+              : 'bg-gradient-to-br from-primary/8 via-accent/8 to-purple/8'
+          }`} />
+          <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700 ${
+            bounty.isPublished === false 
+              ? 'bg-gradient-to-br from-red-300/30 to-orange-300/30' 
+              : 'bg-gradient-to-br from-accent/20 to-purple/20'
+          }`} />
+          
+          {/* Unpublished Overlay */}
+          {bounty.isPublished === false && (
+            <>
+              <div className="absolute inset-0 bg-red-100/10 border-t-4 border-red-400" />
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-12 opacity-5 pointer-events-none">
+                <div className="text-6xl font-black text-red-800 whitespace-nowrap select-none">
+                  UNPUBLISHED
+                </div>
+              </div>
+            </>
+          )}
           {/* Header Section */}
           <CardHeader className="pb-4 relative z-10">
             <div className="flex items-start justify-between gap-3 mb-4">
@@ -135,6 +160,14 @@ export function BountyCard({ bounty, index = 0 }: BountyCardProps) {
                 >
                   {bounty.status}
                 </Badge>
+                {bounty.isPublished !== undefined && !bounty.isPublished && (
+                  <Badge 
+                    className="bg-red-100 text-red-800 border-red-300 shadow-md px-3 py-1 rounded-lg font-bold animate-pulse border-2"
+                  >
+                    <EyeOff className="h-3 w-3 mr-1" />
+                    UNPUBLISHED
+                  </Badge>
+                )}
               </motion.div>
               <div className="flex gap-2 flex-wrap">
                 {bounty.categories?.slice(0, 2)?.map((category) => (

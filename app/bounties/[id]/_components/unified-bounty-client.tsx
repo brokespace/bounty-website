@@ -44,7 +44,8 @@ import {
   ChevronDown,
   ArrowRight,
   FileStack,
-  DollarSign
+  DollarSign,
+  RefreshCw
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -77,6 +78,7 @@ export function UnifiedBountyClient({
   const [requirementsOpen, setRequirementsOpen] = useState(false)
   const [usdPrice, setUsdPrice] = useState<number>(0)
   const [isLoadingPrice, setIsLoadingPrice] = useState(true)
+  const [isUpdatingPublishStatus, setIsUpdatingPublishStatus] = useState(false)
 
   const [submissionForm, setSubmissionForm] = useState({
     title: '',
@@ -331,6 +333,59 @@ export function UnifiedBountyClient({
     setIsDisclaimerVisible(false)
   }
 
+  const handlePublishToggle = async () => {
+    if (!isAdmin) return
+    
+    setIsUpdatingPublishStatus(true)
+    try {
+      const newPublishStatus = !bountyData?.isPublished
+      const response = await fetch(`/api/bounties/${bountyData?.id || bounty?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isPublished: newPublishStatus }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update publish status')
+      }
+
+      const data = await response.json()
+      setBountyData(prev => ({ ...prev, isPublished: newPublishStatus }))
+      toast.success(newPublishStatus ? 'Bounty published successfully!' : 'Bounty unpublished successfully!')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update publish status')
+    } finally {
+      setIsUpdatingPublishStatus(false)
+    }
+  }
+
+  const handleRescore = async (submissionId: string) => {
+    if (!isAdmin) return
+
+    try {
+      const response = await fetch(`/api/submissions/${submissionId}/rescore`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to rescore submission')
+      }
+
+      toast.success('Submission rescored successfully! All scoring jobs and tasks have been cleared.')
+      
+      // Refresh the page to show updated data
+      window.location.reload()
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to rescore submission')
+    }
+  }
+
   const renderSubmission = (submission: any, isUserSubmission: boolean = false) => {
     // Use server-provided anonymization flag, fallback to client-side logic for compatibility
     const shouldAnonymize = submission.isAnonymized !== undefined 
@@ -441,6 +496,21 @@ export function UnifiedBountyClient({
                       submission.status === 'REJECTED' ? 'bg-red-500 shadow-red-500/50' :
                         'bg-orange-500 shadow-orange-500/50'
                     } shadow-lg`} />
+
+                  {/* Admin Rescore Button */}
+                  {isAdmin && (
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRescore(submission.id)}
+                        className="glass-effect border border-blue-500/30 hover:border-blue-500/60 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all duration-300 shadow-lg hover:shadow-blue-500/20 rounded-lg"
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Rescore
+                      </Button>
+                    </motion.div>
+                  )}
 
                   {/* Enhanced Vote Buttons */}
                   {/* {isAuthenticated && user?.id !== submission.submitterId && !(isOwner || isAdmin) && (
@@ -703,6 +773,28 @@ export function UnifiedBountyClient({
                 <Badge className={`${getStatusColor(currentBounty?.status || 'DRAFT')} text-xs px-3 py-1 rounded-lg`}>
                   {currentBounty?.status || 'DRAFT'}
                 </Badge>
+                {currentBounty?.isPublished !== undefined && (
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs px-3 py-1 rounded-lg ${
+                      currentBounty?.isPublished 
+                        ? 'bg-green-50 text-green-700 border-green-300' 
+                        : 'bg-orange-50 text-orange-700 border-orange-300'
+                    }`}
+                  >
+                    {currentBounty?.isPublished ? (
+                      <>
+                        <Eye className="h-3 w-3 mr-1" />
+                        Published
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="h-3 w-3 mr-1" />
+                        Unpublished
+                      </>
+                    )}
+                  </Badge>
+                )}
                 {currentBounty?.categories?.map((category: any) => (
                   <Badge
                     key={category.id}
@@ -967,6 +1059,30 @@ export function UnifiedBountyClient({
                             Total reward pool
                           </div>
                         </div>
+                      )}
+
+                      {/* Admin Publish/Unpublish Button */}
+                      {isAdmin && (
+                        <Button 
+                          onClick={handlePublishToggle}
+                          disabled={isUpdatingPublishStatus}
+                          variant={currentBounty?.isPublished ? "destructive" : "default"}
+                          className="w-full py-3 rounded-xl font-medium transition-colors"
+                        >
+                          {isUpdatingPublishStatus ? (
+                            "Updating..."
+                          ) : currentBounty?.isPublished ? (
+                            <>
+                              <EyeOff className="mr-2 h-4 w-4" />
+                              Unpublish Bounty
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Publish Bounty
+                            </>
+                          )}
+                        </Button>
                       )}
 
                       {/* Premium Submit Button */}
@@ -1308,6 +1424,47 @@ export function UnifiedBountyClient({
                       </ReactMarkdown>
                     </div>
                   </div>
+
+                  {/* Tasks Section */}
+                  {currentBounty?.tasks && currentBounty.tasks.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                      className="border-t border-accent/30 pt-6"
+                    >
+                      <h3 className="font-bold text-xl mb-4 text-gradient bg-gradient-to-r from-accent to-purple bg-clip-text text-transparent flex items-center gap-2">
+                        <Target className="h-5 w-5 text-accent" />
+                        Tasks
+                      </h3>
+                      <div className="space-y-3">
+                        {currentBounty.tasks.map((task: any, index: number) => (
+                          <motion.div
+                            key={task.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.4, delay: index * 0.1 }}
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            className="flex items-start gap-4 p-4 glass-effect border border-accent/30 rounded-xl hover:border-accent/50 transition-all duration-300"
+                          >
+                            <div className="flex-shrink-0">
+                              <div className="w-8 h-8 bg-gradient-to-br from-accent to-purple rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                                {index + 1}
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-lg text-gradient bg-gradient-to-r from-accent to-purple bg-clip-text text-transparent mb-2">
+                                {task.name}
+                              </h4>
+                              <p className="text-muted-foreground leading-relaxed">
+                                {task.description}
+                              </p>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
 
                   {/* Competition Metadata */}
                   <motion.div

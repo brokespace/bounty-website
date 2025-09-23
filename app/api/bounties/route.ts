@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 // GET /api/bounties - Get all bounties with optional filters
 export async function GET(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
     const category = searchParams.get('category')
@@ -28,6 +29,11 @@ export async function GET(req: NextRequest) {
           }
         }
       }
+    }
+    
+    // Only show published bounties to non-admins
+    if (!session?.user?.isAdmin) {
+      where.isPublished = true
     }
 
     const bounties = await prisma.bounty.findMany({
@@ -132,7 +138,9 @@ export async function POST(req: NextRequest) {
       deadline,
       categories,
       acceptedSubmissionTypes,
-      winningSpotConfigs
+      winningSpotConfigs,
+      tasks,
+      isPublished
     } = await req.json()
 
     // Validate required fields
@@ -186,12 +194,19 @@ export async function POST(req: NextRequest) {
         acceptedSubmissionTypes: acceptedSubmissionTypes,
         creatorId: session.user.id,
         status: 'ACTIVE',
+        isPublished: isPublished ?? false,
         winningSpotConfigs: winningSpotConfigs && winningSpotConfigs.length > 0 ? {
           create: winningSpotConfigs.map((spot: any) => ({
             position: spot.position,
             reward: parseFloat(spot.reward),
             rewardCap: parseFloat(spot.rewardCap),
             coldkey: spot.coldkey
+          }))
+        } : undefined,
+        tasks: tasks && tasks.length > 0 ? {
+          create: tasks.filter((task: any) => task.name && task.description).map((task: any) => ({
+            name: task.name,
+            description: task.description
           }))
         } : undefined
       },
@@ -208,7 +223,8 @@ export async function POST(req: NextRequest) {
           orderBy: {
             position: 'asc'
           }
-        }
+        },
+        tasks: true
       }
     })
 

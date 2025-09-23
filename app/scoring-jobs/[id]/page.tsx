@@ -29,7 +29,8 @@ export default async function ScoringJobPage({ params }: Props) {
               creatorId: true,
               info: true,
               problem: true,
-              requirements: true 
+              requirements: true,
+              tasks: true
             }
           },
           submitter: {
@@ -38,7 +39,15 @@ export default async function ScoringJobPage({ params }: Props) {
           files: true
         }
       },
-      screener: true
+      screener: true,
+      scoringTasks: {
+        include: {
+          task: true
+        },
+        orderBy: {
+          createdAt: 'asc'
+        }
+      }
     }
   })
 

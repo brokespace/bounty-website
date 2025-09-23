@@ -48,7 +48,9 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
     hasDeadline: false,
     acceptedSubmissionTypes: ['FILE'] as string[],
     submissionDisclaimer: '',
-    winningSpotConfigs: [{ position: 1, reward: '', rewardCap: '', coldkey: '1' }]
+    winningSpotConfigs: [{ position: 1, reward: '', rewardCap: '', coldkey: '1' }],
+    tasks: [] as { name: string; description: string }[],
+    isPublished: false
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -198,6 +200,29 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
     }))
   }
 
+  const addTask = () => {
+    setFormData(prev => ({
+      ...prev,
+      tasks: [...prev.tasks, { name: '', description: '' }]
+    }))
+  }
+
+  const updateTask = (index: number, field: 'name' | 'description', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map((task, i) => 
+        i === index ? { ...task, [field]: value } : task
+      )
+    }))
+  }
+
+  const removeTask = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      tasks: prev.tasks.filter((_, i) => i !== index)
+    }))
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -291,6 +316,77 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
                   onChange={(e) => handleInputChange('requirements', e.target.value)}
                   required
                 />
+              </div>
+
+              {/* Tasks Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-base font-medium flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Tasks <span className="text-xs text-muted-foreground">(Optional)</span>
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addTask}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Task
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Break down your bounty into specific sub-tasks. This helps hunters understand the scope and allows for detailed scoring.
+                </p>
+                
+                {formData.tasks.length > 0 && (
+                  <div className="space-y-3">
+                    {formData.tasks.map((task, index) => (
+                      <div key={index} className="border border-muted/30 rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium">Task {index + 1}</h4>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeTask(index)}
+                            className="text-red-500 hover:text-red-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div className="space-y-2">
+                            <Label htmlFor={`task-name-${index}`}>
+                              Task Name
+                            </Label>
+                            <Input
+                              id={`task-name-${index}`}
+                              placeholder="e.g., API Integration, Frontend UI, Testing"
+                              value={task.name}
+                              onChange={(e) => updateTask(index, 'name', e.target.value)}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor={`task-description-${index}`}>
+                              Task Description
+                            </Label>
+                            <Textarea
+                              id={`task-description-${index}`}
+                              placeholder="Describe what needs to be accomplished for this task..."
+                              rows={2}
+                              value={task.description}
+                              onChange={(e) => updateTask(index, 'description', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -521,6 +617,27 @@ export function CreateBountyClient({ user }: CreateBountyClientProps) {
                   />
                 </div>
               )}
+            </div>
+
+            {/* Publish Settings */}
+            <div className="space-y-4 p-4 border border-primary/20 rounded-lg bg-primary/5">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isPublished"
+                  checked={formData.isPublished}
+                  onCheckedChange={(checked) => handleInputChange('isPublished', checked)}
+                />
+                <Label htmlFor="isPublished" className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  Publish bounty immediately
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {formData.isPublished 
+                  ? "The bounty will be visible to all users immediately after creation." 
+                  : "The bounty will be created as unpublished and only visible to admins. You can publish it later from the bounty page."
+                }
+              </p>
             </div>
 
             {/* Submit Button */}

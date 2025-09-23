@@ -17,7 +17,9 @@ async function main() {
       hotkey: '4B8C9D2F3A1E7F9B8C5D4A2E8F1C3B7D9E2A5C8F1B4D7A3C6E9F2B5A8D1C4E7',
       username: 'admin_hunter',
       password: testPasswordHash,
-      isActive: true
+      isActive: true,
+      acceptedTos: true,
+      tosAcceptedAt: new Date()
     }
   })
 
@@ -31,7 +33,9 @@ async function main() {
       create: {
         hotkey: `test_user_${i}_hotkey_${Array(32).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('')}`,
         username: `hunter_${i}`,
-        password: userPassword
+        password: userPassword,
+        acceptedTos: true,
+        tosAcceptedAt: new Date()
       }
     })
     users.push(user)
@@ -112,6 +116,7 @@ async function main() {
         rewardDistribution: Math.random() > 0.5 ? 'ALL_AT_ONCE' : 'OVER_TIME',
         winningSpots: Math.floor(Math.random() * 3) + 1,
         status: (['ACTIVE', 'ACTIVE', 'ACTIVE', 'COMPLETED', 'PAUSED'] as const)[Math.floor(Math.random() * 5)],
+        isPublished: Math.random() > 0.2, // 80% chance of being published
         deadline: Math.random() > 0.3 ? new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
         creatorId: creator.id,
         categories: {

@@ -28,6 +28,7 @@ import {
 import Link from 'next/link'
 import { FileDisplay } from '@/components/file-display'
 import { LogStream } from './log-stream'
+import { TaskGrid } from './task-grid'
 
 interface ScoringJobDetailClientProps {
   scoringJob: any
@@ -49,7 +50,7 @@ export function ScoringJobDetailClient({
   const [currentScoringJob, setCurrentScoringJob] = useState(scoringJob)
 
   useEffect(() => {
-    if (currentScoringJob.status === 'SCORING' || currentScoringJob.status === 'ASSIGNED') {
+    if (currentScoringJob.status === 'SCORING' || currentScoringJob.status === 'ASSIGNED' || currentScoringJob.currentScore) {
       const interval = setInterval(async () => {
         try {
           const response = await fetch(`/api/scoring-jobs/${currentScoringJob.id}`)
@@ -60,11 +61,11 @@ export function ScoringJobDetailClient({
         } catch (error) {
           console.error('Failed to refresh scoring job:', error)
         }
-      }, 5000)
+      }, 10000)
 
       return () => clearInterval(interval)
     }
-  }, [currentScoringJob.id, currentScoringJob.status])
+  }, [currentScoringJob.id, currentScoringJob.status, currentScoringJob.currentScore])
 
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -194,16 +195,37 @@ export function ScoringJobDetailClient({
 
               <motion.div
                 whileHover={{ scale: 1.02, y: -1 }}
-                className="glass-effect border border-accent/30 rounded-xl p-4 hover:border-accent/50 transition-all duration-300 shadow-lg hover:shadow-accent/20"
+                className={`glass-effect border rounded-xl p-4 transition-all duration-300 shadow-lg ${
+                  currentScoringJob.currentScore 
+                    ? 'border-yellow-400/50 hover:border-yellow-400/70 shadow-yellow-400/20' 
+                    : 'border-accent/30 hover:border-accent/50 shadow-accent/20'
+                }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-purple rounded-xl flex items-center justify-center shadow-lg">
-                    <Target className="h-5 w-5 text-white" />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${
+                    currentScoringJob.currentScore 
+                      ? 'bg-gradient-to-br from-yellow-400 to-orange-500' 
+                      : 'bg-gradient-to-br from-accent to-purple'
+                  }`}>
+                    {currentScoringJob.currentScore ? (
+                      <Loader2 className="h-5 w-5 text-white animate-spin" />
+                    ) : (
+                      <Target className="h-5 w-5 text-white" />
+                    )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-accent">Score</p>
+                    <p className={`text-sm font-medium ${
+                      currentScoringJob.currentScore ? 'text-yellow-600' : 'text-accent'
+                    }`}>
+                      {currentScoringJob.currentScore ? 'Processing' : 'Score'}
+                    </p>
                     <p className="text-lg font-semibold text-gradient">
-                      {currentScoringJob.score ? `${currentScoringJob.score}/100` : 'Pending'}
+                      {currentScoringJob.currentScore 
+                        ? `${currentScoringJob.currentScore}/100` 
+                        : currentScoringJob.score 
+                          ? `${currentScoringJob.score}/100` 
+                          : 'Pending'
+                      }
                     </p>
                   </div>
                 </div>
@@ -514,7 +536,7 @@ export function ScoringJobDetailClient({
               </>
             )}
 
-            {currentScoringJob.score && (
+            {(currentScoringJob.score || currentScoringJob.currentScore) && (
               <>
                 <Separator className="bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
                 <motion.div
@@ -523,16 +545,35 @@ export function ScoringJobDetailClient({
                   transition={{ delay: 1.4 }}
                   className="space-y-3"
                 >
-                  <Label className="text-sm font-bold text-green-600">Final Score</Label>
+                  <Label className={`text-sm font-bold ${
+                    currentScoringJob.currentScore ? 'text-yellow-600' : 'text-green-600'
+                  }`}>
+                    {currentScoringJob.currentScore ? 'Current Score (Processing)' : 'Final Score'}
+                  </Label>
                   <motion.div
                     animate={{ scale: [1, 1.02, 1] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    className="text-center p-6 bg-gradient-to-br from-green-500/20 via-emerald-500/15 to-green-600/20 border border-green-400/40 rounded-xl shadow-lg backdrop-blur-sm"
+                    className={`text-center p-6 border rounded-xl shadow-lg backdrop-blur-sm ${
+                      currentScoringJob.currentScore 
+                        ? 'bg-gradient-to-br from-yellow-500/20 via-orange-500/15 to-yellow-600/20 border-yellow-400/40'
+                        : 'bg-gradient-to-br from-green-500/20 via-emerald-500/15 to-green-600/20 border-green-400/40'
+                    }`}
                   >
-                    <div className="text-4xl font-bold text-green-400">
-                      {currentScoringJob.score}/100
+                    <div className="flex items-center justify-center gap-3">
+                      <div className={`text-4xl font-bold ${
+                        currentScoringJob.currentScore ? 'text-yellow-400' : 'text-green-400'
+                      }`}>
+                        {currentScoringJob.currentScore || currentScoringJob.score}/100
+                      </div>
+                      {currentScoringJob.currentScore && (
+                        <Loader2 className="h-6 w-6 text-yellow-400 animate-spin" />
+                      )}
                     </div>
-                    <p className="text-sm text-green-300 mt-2 font-medium">Validation Complete</p>
+                    <p className={`text-sm mt-2 font-medium ${
+                      currentScoringJob.currentScore ? 'text-yellow-300' : 'text-green-300'
+                    }`}>
+                      {currentScoringJob.currentScore ? 'Processing...' : 'Validation Complete'}
+                    </p>
                   </motion.div>
                 </motion.div>
               </>
@@ -542,6 +583,26 @@ export function ScoringJobDetailClient({
         </motion.div>
       </div>
 
+      {/* Task Grid Section */}
+      {((currentScoringJob.scoringTasks && currentScoringJob.scoringTasks.length > 0) || 
+        (currentScoringJob.submission.bounty.tasks && currentScoringJob.submission.bounty.tasks.length > 0)) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="card-enhanced relative border border-purple/30 hover:border-purple/50 bg-card"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-purple/8 via-primary/8 to-accent/8 animate-gradient-shift" />
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-purple/20 to-primary/20 rounded-full blur-3xl animate-float" />
+          <div className="p-6 relative z-10">
+            <TaskGrid 
+              scoringJobId={currentScoringJob.id}
+              tasks={currentScoringJob.scoringTasks}
+              bountyTasks={currentScoringJob.submission.bounty.tasks}
+            />
+          </div>
+        </motion.div>
+      )}
 
       {/* Live Logs */}
       <motion.div

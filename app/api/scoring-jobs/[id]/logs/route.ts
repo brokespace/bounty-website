@@ -69,6 +69,7 @@ export async function GET(
     const limit = parseInt(searchParams.get('limit') || '100')
     const page = parseInt(searchParams.get('page') || '0')
     const before = searchParams.get('before') // Timestamp to fetch logs before
+    const taskName = searchParams.get('task_name') // Optional task name filter
     
     // Seq uses ISO 8601 timestamps, not nanoseconds
     const now = new Date()
@@ -86,10 +87,14 @@ export async function GET(
       startTime = new Date(now.getTime() - (24 * 60 * 60 * 1000)) // 24 hours ago
     }
     
-    // Seq query syntax - filter by job_id tag
-    const filter = `job_id = '${params.id}'`
+    // Seq query syntax - filter by job_id tag, optionally by task_name
+    let filter = `job_id = '${params.id}'`
+    
+    if (taskName) {
+      filter += ` and task_name = '${taskName}'`
+    }
 
-    console.log(`[Logs API] Querying Seq with filter: ${filter}, from: ${startTime.toISOString()}, to: ${endTime.toISOString()}, limit: ${limit}, page: ${page}, before: ${before}`)
+    console.log(`[Logs API] Querying Seq with filter: ${filter}, from: ${startTime.toISOString()}, to: ${endTime.toISOString()}, limit: ${limit}, page: ${page}, before: ${before}, task_name: ${taskName}`)
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json'
@@ -134,7 +139,6 @@ export async function GET(
       seqData.Events.reverse()
     }
     
-    console.log(seqData)
     return NextResponse.json(seqData)
   } catch (error) {
     console.error(`[Logs API] Error fetching logs for job ${params.id}:`, error)

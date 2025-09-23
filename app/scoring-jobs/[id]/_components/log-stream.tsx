@@ -352,12 +352,6 @@ export function LogStream({ jobId }: LogStreamProps) {
             </div>
           )}
           
-          {/* End of logs indicator */}
-          {!hasMoreLogs && logs.length > 0 && (
-            <div className="text-center py-2 text-gray-500 border-t border-gray-700 mt-2">
-              — Beginning of logs —
-            </div>
-          )}
         </div>
         
         <div className="mt-2 text-xs text-muted-foreground">

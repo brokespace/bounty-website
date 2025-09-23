@@ -25,6 +25,11 @@ export async function GET(
           }
         },
         categories: true,
+        tasks: {
+          orderBy: {
+            createdAt: 'asc'
+          }
+        },
         winningSpotConfigs: {
           orderBy: {
             position: 'asc'
@@ -55,6 +60,14 @@ export async function GET(
     })
 
     if (!bounty) {
+      return NextResponse.json(
+        { error: 'Bounty not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check if bounty is published or user is admin
+    if (!bounty.isPublished && !session?.user?.isAdmin) {
       return NextResponse.json(
         { error: 'Bounty not found' },
         { status: 404 }
@@ -137,11 +150,37 @@ export async function PUT(
       )
     }
 
-    if (existingBounty.creatorId !== session.user.id) {
+    // Allow admins to update any bounty's publish status, but only creators can update other fields
+    const isAdmin = session.user.isAdmin === true
+    const isCreator = existingBounty.creatorId === session.user.id
+    
+    if (!isCreator && !isAdmin) {
       return NextResponse.json(
         { error: 'Not authorized to update this bounty' },
         { status: 403 }
       )
+    }
+    
+    // Non-admins can't update isPublished field
+    if (!isAdmin && updateData.hasOwnProperty('isPublished')) {
+      return NextResponse.json(
+        { error: 'Only admins can publish/unpublish bounties' },
+        { status: 403 }
+      )
+    }
+    
+    // Non-creators can only update isPublished field
+    if (!isCreator && isAdmin) {
+      const allowedFields = ['isPublished']
+      const providedFields = Object.keys(updateData)
+      const invalidFields = providedFields.filter(field => !allowedFields.includes(field))
+      
+      if (invalidFields.length > 0) {
+        return NextResponse.json(
+          { error: `Admins can only update isPublished field. Invalid fields: ${invalidFields.join(', ')}` },
+          { status: 403 }
+        )
+      }
     }
 
     const updateData = await req.json()
